@@ -26,6 +26,7 @@ services:
       - ./dags:/opt/airflow/dags
       - ./scripts:/opt/airflow/scripts
       - ./logs:/opt/airflow/logs
+      - ./keys:/opt/airflow/keys
     depends_on:
       postgres:
         condition: service_healthy
