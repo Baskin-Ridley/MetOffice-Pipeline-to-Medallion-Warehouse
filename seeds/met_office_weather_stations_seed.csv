@@ -1,0 +1,391 @@
+﻿station_name,country,location,station_type,is_monitored
+Douglas,British Isles,"54.168, -4.48",Manual,0
+Ronaldsway,British Isles,"54.085, -4.631",Automatic,0
+Guernsey: Airport,Channel Islands,"49.432, -2.598",Automatic,0
+Jersey: Airport,Channel Islands,"49.208, -2.196",Automatic,0
+Jersey: St Helier,Channel Islands,"49.2, -2.1",Manual,0
+"Jersey: Trinity, States Farm",Channel Islands,"49.239, -2.093",Manual,0
+Albemarle,England,"55.02, -1.88",Automatic,0
+Alice Holt Lodge,England,"51.178, -0.849",Automatic,0
+Almondsbury,England,"51.551, -2.558",Automatic,0
+Amersham Field Centre,England,"51.664, -0.656",Manual,0
+Andrewsfield,England,"51.896, 0.452",Automatic,0
+Astwood Bank,England,"52.248, -1.934",Automatic,0
+Bainbridge,England,"54.308, -2.1",Automatic,0
+Bank Newton No 2,England,"53.975, -2.132",Manual,0
+Bedford,England,"52.227, -0.464",Automatic,0
+Benson,England,"51.62, -1.097",Automatic,0
+Berry Head,England,"50.399, -3.483",Automatic,0
+Bewcastle,England,"55.065, -2.714",Manual,0
+"Bingley, No 2",England,"53.811, -1.865",Automatic,0
+"Blackpool, Squires Gate",England,"53.776, -3.037",Automatic,0
+Blencathra,England,"54.619, -3.079",Automatic,0
+Bognor Regis,England,"50.781, -0.675",Manual,0
+Boscombe Down,England,"51.161, -1.753",Automatic,0
+Boulmer,England,"55.421, -1.6",Automatic,0
+"Bournemouth, Kings Park",England,"50.734, -1.822",Manual,0
+Bradford,England,"53.813, -1.772",Automatic,0
+Bramham,England,"53.869, -1.317",Automatic,0
+Brampton No 3,England,"54.935, -2.733",Manual,0
+"Bratton Fleming, Haxton",England,"51.116, -3.94",Manual,0
+Bridgefoot,England,"54.649, -3.458",Automatic,0
+Bridlington Mrsc,England,"54.094, -0.174",Automatic,0
+Brize Norton,England,"51.758, -1.576",Automatic,0
+Broadwindsor,England,"50.821, -2.789",Manual,0
+Brooms Barn,England,"52.26, 0.567",Automatic,0
+Bude,England,"50.828, -4.545",Automatic,0
+"Buntingford, No 2",England,"51.943, -0.09",Manual,0
+Buxton,England,"53.258, -1.912",Manual,0
+Camborne,England,"50.218, -5.327",Automatic,0
+"Cambridge, Botanic Garden",England,"52.194, 0.131",Manual,0
+"Cambridge, Niab",England,"52.245, 0.102",Automatic,0
+"Cardinham, Bodmin",England,"50.502, -4.666",Automatic,0
+Carlisle,England,"54.934, -2.962",Automatic,0
+Carlton-in-cleveland,England,"54.428, -1.216",Manual,0
+Cavendish,England,"52.09, 0.63",Automatic,0
+Cawood,England,"53.827, -1.147",Manual,0
+Charlwood,England,"51.144, -0.228",Automatic,0
+Charsfield,England,"52.162, 1.281",Automatic,0
+"Chertsey, Abbey Mead P Sta",England,"51.398, -0.494",Automatic,0
+Chillingham Barns No 2,England,"55.529, -1.919",Automatic,0
+Chivenor,England,"51.089, -4.147",Automatic,0
+Church Lawford,England,"52.358, -1.33",Automatic,0
+Cippenham S Wks,England,"51.506, -0.641",Automatic,0
+Cirencester,England,"51.708, -1.994",Manual,0
+Coleshill,England,"52.48, -1.689",Automatic,0
+Coningsby,England,"53.094, -0.171",Automatic,0
+Copley,England,"54.624, -1.869",Manual,0
+Coton-in-the-elms,England,"52.737, -1.64",Automatic,0
+"Coventry, Coundon",England,"52.424, -1.535",Automatic,0
+Cranwell,England,"53.031, -0.502",Automatic,0
+Cromer,England,"52.933, 1.293",Automatic,0
+Crosby,England,"53.497, -3.056",Automatic,0
+Culdrose,England,"50.084, -5.256",Automatic,0
+Denver,England,"52.583, 0.348",Manual,0
+Donna Nook No 2,England,"53.475, 0.155",Automatic,0
+Dunkeswell Aerodrome,England,"50.86, -3.239",Automatic,0
+Durham,England,"54.768, -1.585",Automatic,0
+East Bergholt,England,"51.959, 1.025",Manual,0
+East Malling,England,"51.287, 0.45",Automatic,0
+Eastbourne,England,"50.759, 0.285",Manual,0
+Edenbridge,England,"51.203, 0.136",Manual,0
+Emley Moor No 2,England,"53.612, -1.667",Automatic,0
+Exeter Airport No 2,England,"50.737, -3.405",Automatic,0
+Faversham,England,"51.297, 0.88",Manual,0
+Felsham,England,"52.172, 0.833",Manual,0
+Frittenden,England,"51.141, 0.597",Automatic,0
+Fylingdales,England,"54.359, -0.67",Automatic,0
+Gibraltar Point,England,"53.095, 0.323",Manual,0
+"Gosport, Fleetlands",England,"50.836, -1.167",Automatic,0
+Goudhurst,England,"51.077, 0.461",Automatic,0
+Great Dun Fell No 2,England,"54.683, -2.45",Automatic,0
+Gringley-on-the-hill,England,"53.406, -0.883",Automatic,0
+Hartpury College,England,"51.904, -2.311",Manual,0
+Hastings,England,"50.855, 0.572",Manual,0
+Hayling Island,England,"50.785, -0.985",Manual,0
+Hazelrigg,England,"54.014, -2.774",Manual,0
+Heathrow,England,"51.479, -0.452",Automatic,0
+Hemyock,England,"50.908, -3.226",Manual,0
+"Hereford, Credenhill",England,"52.08, -2.801",Automatic,0
+"Herstmonceux, West End",England,"50.89, 0.318",Automatic,0
+High Beach,England,"51.663, 0.043",Automatic,0
+High Mowthorpe,England,"54.105, -0.641",Automatic,0
+Holbeach No 2,England,"52.873, 0.14",Automatic,0
+Hollacombe,England,"50.807, -4.309",Manual,0
+"Holne, Priddons Farm No 2",England,"50.516, -3.841",Manual,0
+Houghton Hall,England,"52.824, 0.654",Automatic,0
+"Hull, East Park",England,"53.766, -0.296",Automatic,0
+Huntsham,England,"50.953, -3.437",Manual,0
+Hurn,England,"50.779, -1.835",Automatic,0
+Ipstones Edge,England,"53.055, -1.95",Manual,0
+Isle Of Portland,England,"50.522, -2.454",Automatic,0
+Iver W Wks,England,"51.512, -0.495",Automatic,0
+Keele,England,"52.999, -2.269",Automatic,0
+Kenley Airfield,England,"51.303, -0.09",Automatic,0
+Keswick,England,"54.614, -3.155",Automatic,0
+Kew Gardens,England,"51.481, -0.293",Automatic,0
+Kielder Castle,England,"55.234, -2.579",Automatic,0
+Kingston Maurward,England,"50.717, -2.397",Manual,0
+Lacock,England,"51.431, -2.113",Manual,0
+Langdon Bay,England,"51.133, 1.345",Automatic,0
+Lapford,England,"50.863, -3.808",Manual,0
+Larkhill,England,"51.201, -1.804",Automatic,0
+Leconfield,England,"53.874, -0.44",Automatic,0
+"Leek, Thorncliffe",England,"53.128, -1.98",Automatic,0
+Leeming,England,"54.297, -1.531",Automatic,0
+Levens Hall,England,"54.259, -2.777",Automatic,0
+"Lingwood, Strumpshaw Hill",England,"52.61, 1.485",Manual,0
+Linkenholt Post Office,England,"51.319, -1.478",Manual,0
+Liscombe,England,"51.086, -3.608",Automatic,0
+Little Rissington,England,"51.86, -1.691",Automatic,0
+Loftus,England,"54.563, -0.862",Automatic,0
+"London, St James's Park",England,"51.504, -0.129",Automatic,0
+Lyneham,England,"51.503, -1.991",Automatic,0
+Malham Tarn,England,"54.1, -2.162",Automatic,0
+Mannington Hall,England,"52.844, 1.181",Manual,0
+Manston,England,"51.346, 1.337",Automatic,0
+Marham,England,"52.651, 0.568",Automatic,0
+"Market Bosworth, Bosworth Park",England,"52.623, -1.394",Automatic,0
+Marnhull,England,"50.979, -2.317",Manual,0
+Maulds Meaburn,England,"54.538, -2.581",Manual,0
+Merryfield,England,"50.96, -2.932",Automatic,0
+Mickleham,England,"51.26, -0.319",Manual,0
+Middle Wallop,England,"51.149, -1.569",Automatic,0
+"Middleton, Hillside",England,"53.099, -1.587",Manual,0
+Monks Wood,England,"52.401, -0.235",Automatic,0
+Morecambe No 2,England,"54.076, -2.858",Automatic,0
+"Morpeth, Cockle Park",England,"55.212, -1.684",Automatic,0
+Myerscough,England,"53.854, -2.765",Automatic,0
+Neatishead,England,"52.714, 1.473",Automatic,0
+Nettlecombe,England,"51.13, -3.349",Manual,0
+Newport (salop),England,"52.777, -2.426",Automatic,0
+Normanby Hall,England,"53.637, -0.658",Automatic,0
+"North Somercotes, Church End",England,"53.441, 0.143",Manual,0
+North Wyke,England,"50.768, -3.903",Automatic,0
+Northolt,England,"51.548, -0.415",Automatic,0
+"Nottingham, Watnall",England,"53.005, -1.25",Automatic,0
+Odiham,England,"51.239, -0.943",Automatic,0
+"Okehampton, East Okement Farm",England,"50.703, -3.976",Automatic,0
+Otterbourne W Wks,England,"51.008, -1.334",Automatic,0
+Oxford,England,"51.761, -1.262",Manual,0
+"Pateley Bridge, Ravens Nest",England,"54.07, -1.77",Automatic,0
+Pennerley,England,"52.59, -2.948",Automatic,0
+Pershore,England,"52.148, -2.04",Automatic,0
+Pershore College,England,"52.1, -2.059",Automatic,0
+Pitsford,England,"52.301, -0.893",Manual,0
+"Plymouth, Mountbatten",England,"50.354, -4.12",Automatic,0
+Preston Montford,England,"52.724, -2.84",Manual,0
+"Preston, Cove House",England,"50.637, -2.424",Manual,0
+"Preston, Moor Park",England,"53.774, -2.703",Automatic,0
+"Reading University, Whiteknights",England,"51.441, -0.937",Automatic,0
+Redesdale Camp,England,"55.285, -2.278",Wind only,0
+Rochdale,England,"53.608, -2.177",Automatic,0
+Ross-on-wye,England,"51.911, -2.584",Automatic,0
+Rostherne No 2,England,"53.36, -2.381",Automatic,0
+Rothamsted,England,"51.806, -0.359",Automatic,0
+Ryhill,England,"53.628, -1.393",Automatic,0
+Santon Downham,England,"52.459, 0.673",Automatic,0
+Scarborough,England,"54.273, -0.421",Automatic,0
+Scilly: St Marys Airport,England,"49.914, -6.295",Automatic,0
+"Seavington, Hurcott Farm",England,"50.941, -2.86",Manual,0
+Shap,England,"54.502, -2.683",Automatic,0
+Shawbury,England,"52.794, -2.663",Automatic,0
+Sheffield,England,"53.381, -1.49",Automatic,0
+Shirburn Model Farm,England,"51.669, -0.995",Manual,0
+Shobdon Airfield,England,"52.243, -2.885",Automatic,0
+"Shoeburyness, Landwick",England,"51.554, 0.829",Automatic,0
+Shoreham Airport,England,"50.836, -0.292",Automatic,0
+Slapton,England,"50.292, -3.651",Manual,0
+South Farnborough No 2,England,"51.284, -0.777",Automatic,0
+South Newington,England,"51.998, -1.405",Automatic,0
+Spadeadam No 2,England,"55.05, -2.553",Automatic,0
+St Bees Head No 2,England,"54.518, -3.613",Automatic,0
+Stonyhurst,England,"53.845, -2.468",Automatic,0
+"Stoodleigh, Dryhill",England,"50.961, -3.518",Manual,0
+Stowe,England,"52.041, -1.012",Automatic,0
+Sutton Bonington,England,"52.836, -1.25",Automatic,0
+Swanage,England,"50.613, -1.957",Automatic,0
+"Teddington, Bushy Park",England,"51.422, -0.339",Automatic,0
+Teignmouth,England,"50.545, -3.494",Manual,0
+Tetford,England,"53.253, -0.008",Manual,0
+Thornes Park,England,"53.672, -1.515",Manual,0
+Thorney Island,England,"50.814, -0.921",Automatic,0
+Tibenham Airfield,England,"52.456, 1.164",Automatic,0
+Topcliffe,England,"54.205, -1.389",Automatic,0
+Treknow,England,"50.646, -4.754",Manual,0
+Trevince,England,"50.218, -5.174",Manual,0
+Underton,England,"52.523, -2.467",Manual,0
+"Virginstow, Beaworthy",England,"50.71, -4.296",Manual,0
+Waddington,England,"53.175, -0.522",Automatic,0
+Wainfleet No 2,England,"53.088, 0.273",Automatic,0
+Wallingford,England,"51.603, -1.112",Manual,0
+Wallington,England,"55.154, -1.943",Manual,0
+Walney Island,England,"54.125, -3.257",Automatic,0
+Warcop Range,England,"54.572, -2.412",Automatic,0
+Wattisham,England,"52.123, 0.959",Automatic,0
+Wellesbourne,England,"52.205, -1.603",Automatic,0
+Westonbirt,England,"51.606, -2.219",Automatic,0
+Westonzoyland,England,"51.115, -2.921",Manual,0
+Weybourne,England,"52.949, 1.124",Automatic,0
+Whitby,England,"54.481, -0.624",Manual,0
+Wiggonholt,England,"50.938, -0.492",Automatic,0
+Wight: Needles Old Battery,England,"50.662, -1.582",Automatic,0
+Wight: Shanklin,England,"50.623, -1.179",Manual,0
+Wight: St Catherines Point,England,"50.575, -1.295",Automatic,0
+Wight: Ventnor Park,England,"50.592, -1.212",Manual,0
+"Winchcombe, Sudeley Castle",England,"51.948, -1.953",Automatic,0
+Winterbourne No2,England,"52.456, -1.926",Automatic,0
+Wisley,England,"51.31, -0.475",Automatic,0
+Wittering,England,"52.611, -0.466",Automatic,0
+Woburn,England,"52.014, -0.595",Automatic,0
+Writtle,England,"51.733, 0.431",Automatic,0
+Yeovilton,England,"51.006, -2.641",Automatic,0
+Aldergrove,Northern Ireland,"54.664, -6.224",Automatic,0
+Altnahinch Filters,Northern Ireland,"55.048, -6.254",Automatic,0
+Armagh,Northern Ireland,"54.352, -6.649",Automatic,0
+Ballypatrick Forest,Northern Ireland,"55.181, -6.153",Automatic,0
+"Banagher, Caugh Hill",Northern Ireland,"54.886, -6.965",Automatic,0
+Belfast Newforge,Northern Ireland,"54.56, -5.94",Manual,0
+Castle Espie No 2,Northern Ireland,"54.531, -5.689",Automatic,0
+Castlederg,Northern Ireland,"54.707, -7.577",Automatic,0
+"Derrylin, Cornahoule",Northern Ireland,"54.189, -7.561",Automatic,0
+Edenfel,Northern Ireland,"54.594, -7.282",Manual,0
+Giants Causeway,Northern Ireland,"55.234, -6.511",Automatic,0
+Glenanne No 2,Northern Ireland,"54.237, -6.503",Automatic,0
+Helens Bay,Northern Ireland,"54.669, -5.747",Automatic,0
+Hillsborough,Northern Ireland,"54.453, -6.072",Manual,0
+Katesbridge,Northern Ireland,"54.297, -6.11",Automatic,0
+Killowen,Northern Ireland,"54.077, -6.183",Automatic,0
+Killylane,Northern Ireland,"54.817, -6.004",Automatic,0
+Lough Fea,Northern Ireland,"54.721, -6.814",Automatic,0
+Lough Navar Forest,Northern Ireland,"54.439, -7.9",Manual,0
+Magherally,Northern Ireland,"54.359, -6.195",Manual,0
+Magilligan No 2,Northern Ireland,"55.16, -6.948",Automatic,0
+Murlough,Northern Ireland,"54.245, -5.831",Automatic,0
+Portglenone,Northern Ireland,"54.865, -6.457",Automatic,0
+Silent Valley,Northern Ireland,"54.127, -6.001",Manual,0
+Stormont Castle,Northern Ireland,"54.603, -5.829",Automatic,0
+"Strabane, Carricklee",Northern Ireland,"54.808, -7.498",Manual,0
+Thomastown,Northern Ireland,"54.33, -7.594",Automatic,0
+Trassey Slievenaman,Northern Ireland,"54.205, -6.005",Manual,0
+Aboyne No 2,Scotland,"57.076, -2.839",Automatic,0
+Achfary,Scotland,"58.311, -4.915",Manual,0
+Achiltibuie No2,Scotland,"58.015, -5.335",Manual,0
+Achnagart,Scotland,"57.182, -5.373",Automatic,0
+Altnaharra No 2,Scotland,"58.288, -4.441",Automatic,0
+Aonach Mor,Scotland,"56.822, -4.968",Automatic,0
+Arran: Brodick Castle,Scotland,"55.592, -5.153",Manual,0
+Auchincruive,Scotland,"55.477, -4.564",Automatic,0
+"Auchtermuchty, Rossie",Scotland,"56.299, -3.201",Manual,0
+Aultbea No 2,Scotland,"57.859, -5.632",Automatic,0
+Aviemore,Scotland,"57.206, -3.827",Automatic,0
+Baintown,Scotland,"56.221, -3.041",Manual,0
+Balmoral,Scotland,"57.037, -3.219",Automatic,0
+Baltasound No 2,Scotland,"60.749, -0.854",Automatic,0
+"Banff, Golf Club",Scotland,"57.661, -2.519",Manual,0
+Bealach Na Ba No 2,Scotland,"57.418, -5.687",Automatic,0
+"Benmore, Younger Botanic Garden",Scotland,"56.028, -4.984",Manual,0
+Bowhill,Scotland,"55.541, -2.905",Manual,0
+Braemar No 2,Scotland,"57.011, -3.396",Automatic,0
+Brigton,Scotland,"55.038, -4.566",Manual,0
+Bute: Rothesay No2,Scotland,"55.825, -5.055",Manual,0
+Cairngorm Chairlift,Scotland,"57.134, -3.667",Manual,0
+Cairngorm Summit,Scotland,"57.116, -3.642",Automatic,0
+Cairnwell,Scotland,"56.879, -3.42",Automatic,0
+Cassley,Scotland,"58.168, -4.726",Automatic,0
+Cawdor Castle No 2,Scotland,"57.525, -3.923",Manual,0
+Charterhall,Scotland,"55.709, -2.383",Automatic,0
+Craibstone No 2,Scotland,"57.176, -2.258",Automatic,0
+Culzean Castle No 2,Scotland,"55.356, -4.78",Manual,0
+Dalwhinnie No 2,Scotland,"56.94, -4.237",Automatic,0
+"Darvel, Hillview",Scotland,"55.615, -4.283",Manual,0
+Dawyck Botanic Garden,Scotland,"55.604, -3.322",Manual,0
+Drumalbin,Scotland,"55.627, -3.735",Automatic,0
+Drummond Castle,Scotland,"56.338, -3.876",Manual,0
+Drumnadrochit,Scotland,"57.328, -4.485",Automatic,0
+"Dumfries, Crichton Royal No 2",Scotland,"55.047, -3.588",Manual,0
+Dunbar,Scotland,"56.005, -2.527",Manual,0
+"Dunbarney, South Hill",Scotland,"56.344, -3.443",Manual,0
+Dundreggan Rewilding Centre,Scotland,"57.191, -4.765",Automatic,0
+Dundrennan,Scotland,"54.803, -4.007",Automatic,0
+Dunrobin Castle Gardens,Scotland,"57.981, -3.942",Manual,0
+Dunstaffnage,Scotland,"56.451, -5.439",Automatic,0
+Durris,Scotland,"57.032, -2.402",Manual,0
+Dyce,Scotland,"57.205, -2.204",Automatic,0
+"Edinburgh, Gogarbank",Scotland,"55.928, -3.343",Automatic,0
+"Edinburgh, Royal Botanic Garden No 2",Scotland,"55.967, -3.211",Automatic,0
+Eskdalemuir,Scotland,"55.312, -3.205",Automatic,0
+Fair Isle,Scotland,"59.527, -1.628",Automatic,0
+Faskally,Scotland,"56.718, -3.768",Manual,0
+"Fettercairn, Glensaugh No 2",Scotland,"56.893, -2.541",Manual,0
+Floors Castle,Scotland,"55.603, -2.467",Manual,0
+"Forrest Lodge, Burnhead",Scotland,"55.144, -4.276",Manual,0
+Fyvie Castle,Scotland,"57.443, -2.388",Automatic,0
+"Gartocharn, Portnellan Farm",Scotland,"56.048, -4.566",Manual,0
+"Glasgow, Bishopton",Scotland,"55.907, -4.531",Automatic,0
+Grangemouth Refinery,Scotland,"56.009, -3.685",Manual,0
+Gt Cumbrae: Millport,Scotland,"55.749, -4.907",Automatic,0
+Harris: Quidnish,Scotland,"57.78, -6.896",Automatic,0
+Hunterston No 3,Scotland,"55.722, -4.893",Manual,0
+Inverbervie No 2,Scotland,"56.852, -2.264",Automatic,0
+Islay: Port Ellen,Scotland,"55.681, -6.249",Automatic,0
+"Kinbrace, Hatchery",Scotland,"58.231, -3.921",Automatic,0
+Kinlochewe,Scotland,"57.613, -5.305",Automatic,0
+Kinloss,Scotland,"57.646, -3.562",Automatic,0
+Kinross,Scotland,"56.214, -3.411",Manual,0
+Kirkwall,Scotland,"58.954, -2.9",Automatic,0
+Lentran,Scotland,"57.46, -4.372",Automatic,0
+Lerwick,Scotland,"60.139, -1.183",Automatic,0
+Leuchars,Scotland,"56.377, -2.861",Automatic,0
+Loch Glascarnoch,Scotland,"57.725, -4.894",Automatic,0
+Logan Botanic Garden,Scotland,"54.741, -4.957",Automatic,0
+Lossiemouth,Scotland,"57.712, -3.322",Automatic,0
+Lyth No 2,Scotland,"58.55, -3.205",Manual,0
+Machrihanish,Scotland,"55.441, -5.696",Automatic,0
+"Motherwell, Strathclyde Park",Scotland,"55.786, -4.022",Manual,0
+Mugdock Park,Scotland,"55.973, -4.329",Manual,0
+Mylnefield,Scotland,"56.456, -3.069",Manual,0
+Nunraw Abbey,Scotland,"55.921, -2.651",Manual,0
+Orkney: Loch Of Hundland,Scotland,"59.113, -3.228",Manual,0
+Oyne No 2,Scotland,"57.321, -2.544",Manual,0
+Pollok Country Park,Scotland,"55.826, -4.314",Manual,0
+Poolewe,Scotland,"57.775, -5.597",Manual,0
+Port Henderson,Scotland,"57.696, -5.776",Manual,0
+"Portpatrick, Craigenlee Croft",Scotland,"54.863, -5.074",Manual,0
+"Prestwick, Gannet",Scotland,"55.515, -4.583",Automatic,0
+Raasay: Osgaig,Scotland,"57.368, -6.079",Manual,0
+Resallach,Scotland,"58.064, -5.015",Automatic,0
+Salsburgh,Scotland,"55.862, -3.874",Automatic,0
+Skye: Harlosh,Scotland,"57.388, -6.519",Manual,0
+South Uist Range,Scotland,"57.358, -7.384",Automatic,0
+Stornoway Airport,Scotland,"58.214, -6.318",Automatic,0
+Strathallan Airfield,Scotland,"56.326, -3.727",Automatic,0
+Strathy East,Scotland,"58.561, -3.99",Manual,0
+Tain Range,Scotland,"57.819, -3.965",Automatic,0
+Tealing,Scotland,"56.525, -2.926",Manual,0
+Threave,Scotland,"54.926, -3.948",Automatic,0
+Tiree,Scotland,"56.5, -6.88",Automatic,0
+Tomintoul No 6,Scotland,"57.257, -3.377",Manual,0
+Tulloch Bridge,Scotland,"56.867, -4.707",Automatic,0
+Tyndrum No 3,Scotland,"56.419, -4.66",Automatic,0
+"Urquhart, Northwood",Scotland,"57.595, -4.373",Manual,0
+West Freugh,Scotland,"54.859, -4.934",Automatic,0
+Wick Airport,Scotland,"58.454, -3.088",Automatic,0
+Aberdaron,Wales,"52.789, -4.74",Automatic,0
+Aberporth,Wales,"52.139, -4.57",Automatic,0
+Alwen,Wales,"53.062, -3.553",Manual,0
+Arthog No 3,Wales,"52.718, -4.004",Manual,0
+Bala,Wales,"52.907, -3.583",Automatic,0
+Betws-y-coed,Wales,"53.097, -3.788",Manual,0
+Capel Curig No 3,Wales,"53.094, -3.94",Automatic,0
+"Cardiff, Bute Park",Wales,"51.488, -3.187",Automatic,0
+Colwyn Bay,Wales,"53.291, -3.713",Manual,0
+Corgam,Wales,"52.222, -4.079",Manual,0
+Dale Fort,Wales,"51.702, -5.151",Manual,0
+Dinorwic No 2,Wales,"53.142, -4.107",Manual,0
+Gogerddan,Wales,"52.432, -4.019",Automatic,0
+Hawarden Airport,Wales,"53.175, -2.985",Automatic,0
+Lake Vyrnwy No 2,Wales,"52.757, -3.464",Automatic,0
+Libanus,Wales,"51.924, -3.488",Automatic,0
+Llanarmon Dyffryn Ceiriog,Wales,"52.886, -3.254",Manual,0
+"Llangunllo, Cefnsuran",Wales,"52.332, -3.132",Manual,0
+Llysdinam,Wales,"52.215, -3.45",Automatic,0
+Margam No 2,Wales,"51.555, -3.72",Manual,0
+Milford Haven Conservancy Board,Wales,"51.708, -5.052",Automatic,0
+Mona,Wales,"53.26, -4.375",Automatic,0
+Nantyglo,Wales,"51.785, -3.184",Automatic,0
+Pembrey Sands,Wales,"51.714, -4.366",Automatic,0
+Porthmadog,Wales,"52.914, -4.157",Automatic,0
+Prestatyn,Wales,"53.341, -3.411",Manual,0
+Rhyl No 2,Wales,"53.259, -3.508",Automatic,0
+Saron,Wales,"52.013, -4.369",Manual,0
+Scolton Country Park,Wales,"51.859, -4.92",Automatic,0
+Sennybridge No 2,Wales,"52.063, -3.613",Automatic,0
+St Athan,Wales,"51.405, -3.44",Automatic,0
+Swyddffynnon,Wales,"52.272, -3.915",Automatic,0
+Tenby,Wales,"51.668, -4.706",Manual,0
+Trawsgoed,Wales,"52.344, -3.947",Automatic,0
+Usk No 2,Wales,"51.714, -2.922",Automatic,0
+Valley,Wales,"53.252, -4.535",Automatic,0
+Whitechurch,Wales,"51.988, -4.678",Automatic,0
+Whitesands,Wales,"51.895, -5.284",Manual,0
