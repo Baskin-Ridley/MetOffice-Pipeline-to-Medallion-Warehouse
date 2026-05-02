@@ -42,6 +42,8 @@ services:
   airflow-webserver:
     <<: *airflow-common
     command: webserver
+    env_file: 
+      - .env
     ports:
       - "8080:8080"
     restart: always
