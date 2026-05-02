@@ -8,7 +8,7 @@ from datetime import datetime
 
 # configure
 SEEDS_FILE = "seeds/met_office_weather_stations_seed.csv"
-CACHE_DIR = "cache/met_office_metadata"
+LANDED_DIR = "landed/met_office/station_metadata"  
 API_KEY = open(os.getenv("MET_OFFICE_API_KEY")).read().strip()
 HEADERS = {"apikey": API_KEY} # met office expects key to be in header
 BASE_URL = " https://data.hub.api.metoffice.gov.uk/observation-land/1/nearest"
@@ -33,18 +33,6 @@ seeds_df = (
         .alias("longitude")
     )
 )
-# seeds file headers: station_name, country, location, station_type, is_monitored, latitude, longitude
-
-#meta data returns: 
-#  [
-#	{
-#		"geohash": "gcpsvg",
-#		"area": "Greater London",
-#		"region": "se",
-#		"country": "England",
-#		"olson_time_zone": "Europe/London"
-#	}
-#]
 
 def fetch_met_office_metadata (lat: float, lon: float) -> Optional[Dict]:
     params = {
@@ -67,25 +55,24 @@ def fetch_met_office_metadata (lat: float, lon: float) -> Optional[Dict]:
         print(f"Error fetching metadata for coordinates: ({lat}, {lon}) - {e}")
         return None
     
-def ensure_cache_dir_exists() -> str:
-    RUN_TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
-    RUN_CACHE_DIR = os.path.join(CACHE_DIR, RUN_TIMESTAMP)
-    
-    os.makedirs(RUN_CACHE_DIR, exist_ok=True) 
-    
-    return RUN_CACHE_DIR
+def get_run_timestamp() -> str: 
+    return datetime.now().strftime("%Y%m%d_%H%M%S")
 
-def save_metadata_to_cache(station_name: str, metadata: Dict, run_cache_dir: str):
-    file_path = os.path.join(run_cache_dir, f"{station_name}_metadata.json")
+def save_metadata_to_landed(station_name: str, metadata: Dict, run_timestamp: str):
+    # <-- EDIT: Removed geohash, path is just LANDED_DIR / timestamp
+    target_dir = os.path.join(LANDED_DIR, run_timestamp)
     
+    os.makedirs(target_dir, exist_ok=True)
+    
+    # <-- EDIT: File name is just the station name
+    file_path = os.path.join(target_dir, f"{station_name}.json")
     with open(file_path, "w") as f:
         json.dump(metadata, f, indent=4)
 
 def main():
-    current_run_dir = ensure_cache_dir_exists()
-
-    for row in seeds_df.iter_rows(named=True):
-    #for row in seeds_df.head(3).iter_rows(named=True):
+    run_timestamp = get_run_timestamp()
+    for row in seeds_df.head(3).iter_rows(named=True):
+    #for row in seeds_df.iter_rows(named=True):
         station_name = row["station_name"]
         lat = row["latitude"]
         lon = row["longitude"]
@@ -94,15 +81,12 @@ def main():
         metadata = fetch_met_office_metadata(lat, lon)
         
         if metadata:
-            save_metadata_to_cache(station_name, metadata, current_run_dir)
-            print(f"Metadata for station {station_name} saved to cache.")
+            save_metadata_to_landed(station_name, metadata, run_timestamp)
+            print(f"Metadata for station {station_name} saved to landed zone.")
         else:
             print(f"Failed to fetch metadata for station: {station_name}")
         
         time.sleep(1)  # Sleep to respect API rate limits
 
 if __name__ == "__main__":
-    print(seeds_df)
     main()
-
-
