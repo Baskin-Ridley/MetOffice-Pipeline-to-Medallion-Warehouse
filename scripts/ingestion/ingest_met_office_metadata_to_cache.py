@@ -3,6 +3,7 @@ import requests
 import time
 import os
 from typing import Dict, Optional
+import json
 
 # configure
 SEEDS_FILE = "seeds/met_office_weather_stations_seed.csv"
