@@ -28,6 +28,7 @@ services:
       - ./scripts:/opt/airflow/scripts
       - ./logs:/opt/airflow/logs
       - ./keys:/opt/airflow/keys
+      - ./seeds:/opt/airflow/seeds
     depends_on:
       postgres:
         condition: service_healthy
