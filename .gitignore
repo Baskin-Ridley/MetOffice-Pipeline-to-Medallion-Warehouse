@@ -219,3 +219,6 @@ __marimo__/
 
 # keys
 keys/
+
+# cache
+cache/
