@@ -46,9 +46,8 @@ seeds_df = (
 
 def fetch_met_office_metadata (lat: float, lon: float) -> Optional[Dict]:
     params = {
-        "latitude": lat,
-        "longitude": lon,
-        "format": "json"
+        "lat": round(lat, 2),
+        "lon": round(lon, 2)
     }
     
     try:
@@ -75,7 +74,7 @@ def save_metadata_to_cache(station_name: str, metadata: Dict):
         json.dump(metadata, f, indent=4)
 
 def main():
-    for row in seeds_df.iter_rows(named=True):
+    for row in seeds_df.iter_rows(named=True)[:1]:
         station_name = row["station_name"]
         lat = row["latitude"]
         lon = row["longitude"]
@@ -96,5 +95,5 @@ def main():
 if __name__ == "__main__":
     print(seeds_df)
     main()
-    
+
 
