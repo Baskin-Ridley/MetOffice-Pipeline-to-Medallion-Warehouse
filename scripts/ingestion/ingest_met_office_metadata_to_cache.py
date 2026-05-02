@@ -76,7 +76,7 @@ def save_metadata_to_cache(station_name: str, metadata: Dict):
 
 def main():
     #for row in seeds_df.iter_rows(named=True):
-    for row in seeds_df.head(1).iter_rows(named=True):
+    for row in seeds_df.head(3).iter_rows(named=True):
         station_name = row["station_name"]
         lat = row["latitude"]
         lon = row["longitude"]
