@@ -4,6 +4,7 @@ import time
 import os
 from typing import Dict, Optional
 import json
+from datetime import datetime
 
 # configure
 SEEDS_FILE = "seeds/met_office_weather_stations_seed.csv"
@@ -66,17 +67,25 @@ def fetch_met_office_metadata (lat: float, lon: float) -> Optional[Dict]:
         print(f"Error fetching metadata for coordinates: ({lat}, {lon}) - {e}")
         return None
     
-def save_metadata_to_cache(station_name: str, metadata: Dict):
-    if not os.path.exists(CACHE_DIR):
-        os.makedirs(CACHE_DIR)
+def ensure_cache_dir_exists() -> str:
+    RUN_TIMESTAMP = datetime.now().strftime("%Y%m%d_%H%M%S")
+    RUN_CACHE_DIR = os.path.join(CACHE_DIR, RUN_TIMESTAMP)
     
-    file_path = os.path.join(CACHE_DIR, f"{station_name}_metadata.json")
+    os.makedirs(RUN_CACHE_DIR, exist_ok=True) 
+    
+    return RUN_CACHE_DIR
+
+def save_metadata_to_cache(station_name: str, metadata: Dict, run_cache_dir: str):
+    file_path = os.path.join(run_cache_dir, f"{station_name}_metadata.json")
+    
     with open(file_path, "w") as f:
         json.dump(metadata, f, indent=4)
 
 def main():
-    #for row in seeds_df.iter_rows(named=True):
-    for row in seeds_df.head(3).iter_rows(named=True):
+    current_run_dir = ensure_cache_dir_exists()
+
+    for row in seeds_df.iter_rows(named=True):
+    #for row in seeds_df.head(3).iter_rows(named=True):
         station_name = row["station_name"]
         lat = row["latitude"]
         lon = row["longitude"]
@@ -85,14 +94,12 @@ def main():
         metadata = fetch_met_office_metadata(lat, lon)
         
         if metadata:
-            save_metadata_to_cache(station_name, metadata)
+            save_metadata_to_cache(station_name, metadata, current_run_dir)
             print(f"Metadata for station {station_name} saved to cache.")
         else:
             print(f"Failed to fetch metadata for station: {station_name}")
         
         time.sleep(1)  # Sleep to respect API rate limits
-
-    
 
 if __name__ == "__main__":
     print(seeds_df)
