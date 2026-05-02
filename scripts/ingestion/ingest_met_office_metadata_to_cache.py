@@ -12,6 +12,26 @@ HEADERS = {"apikey": API_KEY} # met office expects key to be in header
 BASE_URL = " https://data.hub.api.metoffice.gov.uk/observation-land/1/nearest"
 
 # load seeds
-seeds_df = pl.read_csv(SEEDS_FILE).filter(pl.col("is_monitored") == 1)
+# load seeds
+seeds_df = (
+    pl.read_csv(SEEDS_FILE)
+    .filter(pl.col("is_monitored") == 1)
+    .with_columns(
+        pl.col("location")
+        .str.split(",")
+        .list.get(0)
+        .str.strip_chars()
+        .cast(pl.Float64, strict=False)
+        .alias("latitude"),
+        
+        pl.col("location")
+        .str.split(",")
+        .list.get(1)
+        .str.strip_chars()
+        .cast(pl.Float64, strict=False)
+        .alias("longitude")
+    )
+)
 
-print(f"Loaded {len(seeds_df)} monitored weather stations from seeds file.")
+
+print(seeds_df)
