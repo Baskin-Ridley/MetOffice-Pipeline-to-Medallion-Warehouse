@@ -3,9 +3,11 @@ name = "noaa-pipeline-to-medallion-warehouse"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = "==3.12.*"
 dependencies = [
-    "apache-airflow>=3.2.1",
+    "apache-airflow>=2.10.5",
     "google-cloud-bigquery>=3.41.0",
     "google-cloud-storage>=3.10.1",
+    "polars>=1.40.1",
+    "requests>=2.33.1",
 ]

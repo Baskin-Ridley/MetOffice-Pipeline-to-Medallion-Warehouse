@@ -12,10 +12,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# Switch to the airflow user BEFORE installing python packages
+USER airflow
 WORKDIR /opt/airflow
 
-# Dependency Management
+# Copy dependency management files
 COPY pyproject.toml uv.lock ./
-RUN uv pip install --system --no-cache -r pyproject.toml
 
-USER airflow
+# Let uv install directly from the lockfile into the airflow user's environment
+# Using --system is not needed when running as the airflow user
+RUN uv pip install --no-cache "apache-airflow==${AIRFLOW_VERSION}" -r pyproject.toml
