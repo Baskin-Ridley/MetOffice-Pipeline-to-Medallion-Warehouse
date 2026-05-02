@@ -54,18 +54,20 @@ services:
     restart: always
 
   spark:
-    image: apache/spark-py:v3.4.0
-    user: root 
-    command: >
-      /opt/spark/bin/spark-submit 
-      --class org.apache.spark.sql.connect.service.SparkConnectServer 
-      --packages org.apache.spark:spark-connect_2.12:3.4.0 
-      spark-internal
-    ports:
-      - "15002:15002"  
-      - "4040:4040"   
-    volumes:
-      - ./landed:/opt/airflow/landed
-      - ./bronze:/opt/airflow/bronze
-      - ./silver:/opt/airflow/silver
-      - ./gold:/opt/airflow/gold
+      build:
+        context: .
+        dockerfile: Dockerfile.spark
+      command: >
+        /opt/spark/bin/spark-submit 
+        --class org.apache.spark.sql.connect.service.SparkConnectServer 
+        --packages org.apache.spark:spark-connect_2.12:3.4.0 
+        spark-internal
+      ports:
+        - "15002:15002"  
+        - "4040:4040"   
+      volumes:
+        - ./landed:/opt/airflow/landed
+        - ./bronze:/opt/airflow/bronze
+        - ./silver:/opt/airflow/silver
+        - ./gold:/opt/airflow/gold
+
