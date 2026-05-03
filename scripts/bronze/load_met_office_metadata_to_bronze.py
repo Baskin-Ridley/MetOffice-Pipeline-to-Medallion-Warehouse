@@ -5,7 +5,7 @@ import uuid
 
 # Base directory
 BRONZE_DIR = "/opt/airflow/bronze/met_office/station_metadata"
-LANDED_DIR = "/opt/airflow/landed/met_office/station_metadata/*.json"
+LANDED_DIR = "/opt/airflow/landed/met_office/station_metadata/*/*.json"
 
 def main():
     print("connecting to spark...")

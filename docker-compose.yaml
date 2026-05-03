@@ -15,6 +15,7 @@ services:
 
   airflow-common: &airflow-common
     build: .
+    user: root 
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
@@ -24,11 +25,17 @@ services:
       - GCP_PROJECT_ID=${GCP_PROJECT_ID}
       - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
     volumes:
+      # local
       - ./dags:/opt/airflow/dags
       - ./scripts:/opt/airflow/scripts
       - ./logs:/opt/airflow/logs
       - ./keys:/opt/airflow/keys
       - ./seeds:/opt/airflow/seeds
+      # SHARED NAMED VOLUMES: 
+      - landed-vol:/opt/airflow/landed
+      - bronze-vol:/opt/airflow/bronze
+      - silver-vol:/opt/airflow/silver
+      - gold-vol:/opt/airflow/gold
     depends_on:
       postgres:
         condition: service_healthy
@@ -54,20 +61,26 @@ services:
     restart: always
 
   spark:
-      build:
-        context: .
-        dockerfile: Dockerfile.spark
-      command: >
-        /opt/spark/bin/spark-submit 
-        --class org.apache.spark.sql.connect.service.SparkConnectServer 
-        --packages org.apache.spark:spark-connect_2.12:3.4.0 
-        spark-internal
-      ports:
-        - "15002:15002"  
-        - "4040:4040"   
-      volumes:
-        - ./landed:/opt/airflow/landed
-        - ./bronze:/opt/airflow/bronze
-        - ./silver:/opt/airflow/silver
-        - ./gold:/opt/airflow/gold
+    build:
+      context: .
+      dockerfile: Dockerfile.spark
+    user: root 
+    command: >
+      /opt/spark/bin/spark-submit 
+      --class org.apache.spark.sql.connect.service.SparkConnectServer 
+      --packages org.apache.spark:spark-connect_2.12:3.4.0 
+      spark-internal
+    ports:
+      - "15002:15002"  
+      - "4040:4040"   
+    volumes:
+      - landed-vol:/opt/airflow/landed
+      - bronze-vol:/opt/airflow/bronze
+      - silver-vol:/opt/airflow/silver
+      - gold-vol:/opt/airflow/gold
 
+volumes:
+  landed-vol:
+  bronze-vol:
+  silver-vol:
+  gold-vol:
