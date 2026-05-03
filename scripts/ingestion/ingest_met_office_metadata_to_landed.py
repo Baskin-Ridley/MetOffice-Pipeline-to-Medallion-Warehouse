@@ -11,28 +11,7 @@ SEEDS_FILE = "seeds/met_office_weather_stations_seed.csv"
 LANDED_DIR = "landed/met_office/station_metadata"  
 API_KEY = open(os.getenv("MET_OFFICE_API_KEY")).read().strip()
 HEADERS = {"apikey": API_KEY} # met office expects key to be in header
-BASE_URL = " https://data.hub.api.metoffice.gov.uk/observation-land/1/nearest"
-
-# load seeds
-seeds_df = (
-    pl.read_csv(SEEDS_FILE)
-    .filter(pl.col("is_monitored") == 1)
-    .with_columns(
-        pl.col("location")
-        .str.split(",")
-        .list.get(0)
-        .str.strip_chars()
-        .cast(pl.Float64, strict=False)
-        .alias("latitude"),
-        
-        pl.col("location")
-        .str.split(",")
-        .list.get(1)
-        .str.strip_chars()
-        .cast(pl.Float64, strict=False)
-        .alias("longitude")
-    )
-)
+BASE_URL = "https://data.hub.api.metoffice.gov.uk/observation-land/1/nearest"
 
 def fetch_met_office_metadata (lat: float, lon: float) -> Optional[Dict]:
     params = {
@@ -70,6 +49,27 @@ def save_metadata_to_landed(station_name: str, metadata: Dict, run_timestamp: st
         json.dump(metadata, f, indent=4)
 
 def main():
+    # load seeds
+    seeds_df = (
+        pl.read_csv(SEEDS_FILE)
+        .filter(pl.col("is_monitored") == 1)
+        .with_columns(
+            pl.col("location")
+            .str.split(",")
+            .list.get(0)
+            .str.strip_chars()
+            .cast(pl.Float64, strict=False)
+            .alias("latitude"),
+            
+            pl.col("location")
+            .str.split(",")
+            .list.get(1)
+            .str.strip_chars()
+            .cast(pl.Float64, strict=False)
+            .alias("longitude")
+        )
+    )
+
     run_timestamp = get_run_timestamp()
     for row in seeds_df.head(3).iter_rows(named=True):
     #for row in seeds_df.iter_rows(named=True):
