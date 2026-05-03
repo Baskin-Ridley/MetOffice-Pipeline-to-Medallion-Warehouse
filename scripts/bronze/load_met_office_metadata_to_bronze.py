@@ -42,11 +42,11 @@ def main():
     df_bronze = df_bronze.select(*new_column_order)
 
     print(f"Writing data to: {versioned_output_path}")
-    df_bronze.coalesce(1).write.mode("overwrite").parquet(versioned_output_path)
-    # df_bronze.write.format("delta") \
-    # .mode("append") \
-    # .option("mergeSchema", "true") \
-    # .save(BRONZE_DIR)
+    #df_bronze.coalesce(1).write.mode("overwrite").parquet(versioned_output_path)
+    df_bronze.write.format("delta") \
+     .mode("append") \
+     .option("mergeSchema", "true") \
+     .save(BRONZE_DIR)
     print(f"Ingestion complete. Version {version_id} created.")
     df_bronze.printSchema()
     df_bronze.show(10, truncate=False)
