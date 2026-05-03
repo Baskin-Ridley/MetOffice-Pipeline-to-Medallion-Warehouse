@@ -34,7 +34,7 @@ def main():
     df_bronze = df \
         .withColumn("_source_file", input_file_name()) \
         .withColumn("station_name", regexp_extract("_source_file", r"([^/]+)(?=\.json$)", 1)) \
-        .withColumn("_ingested_at", current_timestamp()) \
+        .withColumn("_processed_at", current_timestamp()) \
         .withColumn("_extraction_id", lit(extraction_id)) \
         .withColumn("_row_hash", sha2(concat_ws("||", *df.columns), 256))
 
