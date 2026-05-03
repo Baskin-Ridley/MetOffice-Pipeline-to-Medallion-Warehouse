@@ -25,7 +25,7 @@ def fetch_met_office_metadata (lat: float, lon: float) -> Optional[Dict]:
         data = response.json()
         
         if data and isinstance(data, list) and len(data) > 0:
-            return data[0]  # Return the first metadata entry
+            return data[0]  
         else:
             print(f"No metadata found for coordinates: ({lat}, {lon})")
             return None
@@ -38,12 +38,10 @@ def get_run_timestamp() -> str:
     return datetime.now().strftime("%Y%m%d_%H%M%S")
 
 def save_metadata_to_landed(station_name: str, metadata: Dict, run_timestamp: str):
-    # <-- EDIT: Removed geohash, path is just LANDED_DIR / timestamp
     target_dir = os.path.join(LANDED_DIR, run_timestamp)
     
     os.makedirs(target_dir, exist_ok=True)
     
-    # <-- EDIT: File name is just the station name
     file_path = os.path.join(target_dir, f"{station_name}.json")
     with open(file_path, "w") as f:
         json.dump(metadata, f, indent=4)
