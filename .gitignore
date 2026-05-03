@@ -222,4 +222,5 @@ keys/
 
 # cache
 cache/
-.bruin.yml
+
+.logs/
