@@ -48,5 +48,7 @@ def main():
     df_bronze.printSchema()
     df_bronze.show(10, truncate=False)
 
+    spark.stop()
+
 if __name__ == "__main__":
     main()
