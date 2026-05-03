@@ -60,25 +60,46 @@ services:
     command: scheduler
     restart: always
 
+  # spark:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.spark
+  #   user: root 
+  #   command: >
+  #     /opt/spark/bin/spark-submit 
+  #     --class org.apache.spark.sql.connect.service.SparkConnectServer 
+  #     --packages org.apache.spark:spark-connect_2.12:3.4.0 
+  #     spark-internal
+  #   ports:
+  #     - "15002:15002"  
+  #     - "4040:4040"   
+  #   volumes:
+  #     - landed-vol:/opt/airflow/landed
+  #     - bronze-vol:/opt/airflow/bronze
+  #     - silver-vol:/opt/airflow/silver
+  #     - gold-vol:/opt/airflow/gold
+
   spark:
-    build:
-      context: .
-      dockerfile: Dockerfile.spark
-    user: root 
+    image: deltaio/delta-docker:4.0.1
+    user: root
+    # Force the image to ignore the "Choose an Interface" interactive menu
+    entrypoint: ["/opt/spark/bin/spark-submit"]
     command: >
-      /opt/spark/bin/spark-submit 
+      --packages io.delta:delta-spark_2.13:4.0.0
+      --conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension 
+      --conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog 
+      --conf spark.sql.catalog.spark_catalog.warehouse=/opt/spark/spark-warehouse
+      --conf spark.driver.bindAddress=0.0.0.0
       --class org.apache.spark.sql.connect.service.SparkConnectServer 
-      --packages org.apache.spark:spark-connect_2.12:3.4.0 
       spark-internal
     ports:
-      - "15002:15002"  
-      - "4040:4040"   
+      - "15002:15002"
+      - "4040:4040"
     volumes:
       - landed-vol:/opt/airflow/landed
       - bronze-vol:/opt/airflow/bronze
       - silver-vol:/opt/airflow/silver
       - gold-vol:/opt/airflow/gold
-
 volumes:
   landed-vol:
   bronze-vol:

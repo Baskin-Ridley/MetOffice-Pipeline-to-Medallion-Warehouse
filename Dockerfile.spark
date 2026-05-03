@@ -1,12 +1,20 @@
 FROM apache/spark-py:v3.4.0
 
-# 1. Switch to root temporarily to perform admin tasks
 USER root
 
-# 2. Create the package cache directory and the logs directory
-# 3. Change ownership (chown) to the restricted spark user (UID 185)
-RUN mkdir -p /opt/spark/.ivy2 && \
-    chown -R 185:0 /opt/spark/.ivy2
+# 1. Create directories for Ivy cache and Spark local storage
+RUN mkdir -p /opt/spark/.ivy2 /opt/spark/spark-warehouse && \
+    chown -R 185:0 /opt/spark/.ivy2 /opt/spark/spark-warehouse
 
-# 4. Drop privileges and switch BACK to the secure, non-root user
+# 2. Pre-download the Delta and Spark Connect jars 
+# This speeds up container startup significantly.
+RUN /opt/spark/bin/spark-submit \
+    --packages org.apache.spark:spark-connect_2.12:3.4.0,io.delta:delta-spark_2.12:2.4.0 \
+    --repositories https://repo1.maven.org/maven2 \
+    --version
+
+# 3. Set Environment variables to point to the cache
+ENV IVY_PACKAGE_DIR=/opt/spark/.ivy2
+
+# Switch back to the Spark user
 USER 185

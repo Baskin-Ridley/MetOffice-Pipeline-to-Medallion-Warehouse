@@ -10,5 +10,6 @@ dependencies = [
     "google-cloud-storage>=3.10.1",
     "polars>=1.40.1",
     "requests>=2.33.1",
-    "pyspark[connect]==3.4.0", 
+    "pyspark[connect]==3.5.3",
+    "delta-spark==3.2.0",
 ]
