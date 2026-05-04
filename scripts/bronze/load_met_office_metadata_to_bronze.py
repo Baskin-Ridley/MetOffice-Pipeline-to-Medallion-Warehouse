@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import current_timestamp, input_file_name, regexp_extract, lit, sha2, concat_ws
+from pyspark.sql.functions import current_timestamp, input_file_name, regexp_replace, regexp_extract, lit, sha2, concat_ws
 from datetime import datetime
 import uuid
 import glob
@@ -32,7 +32,7 @@ def main():
 
     extraction_id = str(uuid.uuid4())
     df_bronze = df \
-        .withColumn("_source_file", input_file_name()) \
+        .withColumn("_source_file", regexp_replace(input_file_name(), "%20", " ")) \
         .withColumn("station_name", regexp_extract("_source_file", r"([^/]+)(?=\.json$)", 1)) \
         .withColumn("_processed_at", current_timestamp()) \
         .withColumn("_extraction_id", lit(extraction_id)) \

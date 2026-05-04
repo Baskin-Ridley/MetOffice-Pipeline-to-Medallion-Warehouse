@@ -224,3 +224,5 @@ keys/
 cache/
 
 .logs/
+
+.bruin.yml
