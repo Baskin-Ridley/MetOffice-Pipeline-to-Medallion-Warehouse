@@ -17,13 +17,16 @@ def transform_to_silver(df):
         trim(col("area")).alias("county_name"),
         trim(col("country")).alias("country_name"),
         trim(col("olson_time_zone")).alias("olson_time_zone"),
-        upper(trim(col("region")).alias("region_code")),
+        upper(trim(col("region"))).alias("region_code"),
         # audit columns
         current_timestamp().alias("_processed_at"),
         sha2(concat_ws("||", col("station_name"), col("geohash"), col("area"), col("country"), col("olson_time_zone"), col("region")), 256).alias("_row_hash"),
         lit("met_office").alias("_source_system")
     )
+    print("Transformation to Silver layer complete. Schema:")
+    df_silver.printSchema()
     return df_silver
+
 
 
 
