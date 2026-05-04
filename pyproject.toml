@@ -12,4 +12,5 @@ dependencies = [
     "requests>=2.33.1",
     "pyspark[connect]==3.5.3",
     "delta-spark==3.2.0",
+    "deltalake>=1.5.1",
 ]
