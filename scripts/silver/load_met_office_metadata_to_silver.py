@@ -6,6 +6,7 @@ BRONZE_DIR = "/opt/airflow/bronze/met_office/station_metadata"
 SILVER_DIR = "/opt/airflow/silver/met_office/station_metadata"
 
 def main():
+    print("Connecting to Spark...")
     spark = SparkSession.builder \
         .remote("sc://spark:15002") \
         .appName("MetOffice Metadata bronze to silver") \
@@ -13,10 +14,10 @@ def main():
         .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
         .getOrCreate()
     
-    # 1. Change to readStream to pick up only new data
+    print("Connected to Spark")
+
     df = spark.readStream.format("delta").load(BRONZE_DIR)
     
-    # 2. Use writeStream with a checkpoint and trigger
     query = df.writeStream \
         .format("delta") \
         .outputMode("append") \
@@ -26,7 +27,7 @@ def main():
     
     query.awaitTermination()
     
-    print("New data successfully incrementally written to Silver layer!")
+    print("New data successfully written to Silver layer!")
     spark.stop()
 
 if __name__ == "__main__":
