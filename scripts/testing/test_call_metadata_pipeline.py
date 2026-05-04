@@ -4,5 +4,6 @@ subprocess.check_call(["python", "scripts/ingestion/ingest_met_office_metadata_t
 print("ingest_met_office_metadata_to_landed.py complete")
 subprocess.check_call(["python", "scripts/bronze/load_met_office_metadata_to_bronze.py"])
 print("load_met_office_metadata_to_bronze.py complete")
-
+subprocess.check_call(["python", "scripts/silver/load_met_office_metadata_to_silver.py"])
+print("load_met_office_metadata_to_silver.py complete")
 print("done")
