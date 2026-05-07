@@ -1,12 +1,11 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import current_timestamp, input_file_name, regexp_replace, regexp_extract, lit, sha2, concat_ws
 import uuid
-import glob
-import os
+from pathlib import Path
 
 # Base directory
-BRONZE_DIR = "/opt/airflow/bronze/met_office/station_metadata"
-LANDED_BASE_DIR = "/opt/airflow/landed/met_office/station_metadata"
+BRONZE_DIR = Path("/opt/airflow/bronze/met_office/station_metadata")
+LANDED_BASE_DIR = Path("/opt/airflow/landed/met_office/station_metadata")
 
 def main():
     print("connecting to spark...")
@@ -15,18 +14,17 @@ def main():
         .appName("MetOffice Metadata landed to bronze") \
         .getOrCreate()
 
-    landed_folders = sorted(glob.glob(f"{LANDED_BASE_DIR}/*"))
+    landed_folders = sorted([f for f in LANDED_BASE_DIR.iterdir() if f.is_dir()])
     latest_folder = landed_folders[-1] 
     
-    LANDED_DIR = f"{latest_folder}/*.json"
-
-    version_id = os.path.basename(latest_folder)
-    versioned_output_path = f"{BRONZE_DIR}/{version_id}"
+    LANDED_DIR = latest_folder / "*.json"
+    version_id = latest_folder.name
+    versioned_output_path = BRONZE_DIR / version_id
 
     df = ( 
         spark.read
         .option("multiline", "true") \
-        .json(LANDED_DIR)
+        .json(str(LANDED_DIR))
     )
 
     extraction_id = str(uuid.uuid4())
@@ -41,11 +39,11 @@ def main():
     df_bronze = df_bronze.select(*new_column_order)
 
     print(f"Writing data to: {versioned_output_path}")
-    #df_bronze.coalesce(1).write.mode("overwrite").parquet(versioned_output_path)
     df_bronze.write.format("delta") \
      .mode("append") \
      .option("mergeSchema", "true") \
-     .save(BRONZE_DIR)
+     .save(str(BRONZE_DIR))
+     
     print(f"Ingestion complete. Version {version_id} created.")
     df_bronze.printSchema()
     df_bronze.show(10, truncate=False)
