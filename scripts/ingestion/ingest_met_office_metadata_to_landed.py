@@ -35,7 +35,10 @@ def fetch_met_office_metadata (lat: float, lon: float) -> Optional[Dict]:
         return None
     
 def get_run_timestamp() -> str: 
-    return datetime.now().strftime("%Y%m%d_%H%M%S")
+    return new_func()
+
+def new_func():
+    return datetime.now().astimezone().strftime("%Y%m%d_%H%M%S%z")
 
 def save_metadata_to_landed(station_name: str, metadata: Dict, run_timestamp: str):
     target_dir = os.path.join(LANDED_DIR, run_timestamp)

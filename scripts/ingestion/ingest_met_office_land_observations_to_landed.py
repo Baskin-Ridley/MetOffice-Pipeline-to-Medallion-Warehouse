@@ -33,7 +33,7 @@ def main():
         print(f"Failed to load silver metadata: {e}")
         return
 
-    run_timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    run_timestamp = datetime.now().astimezone().strftime("%Y%m%d_%H%M%S%z")
     target_dir = os.path.join(LANDED_DIR, run_timestamp)
     os.makedirs(target_dir, exist_ok=True)
 

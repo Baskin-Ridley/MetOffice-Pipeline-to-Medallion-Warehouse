@@ -11,41 +11,38 @@ LANDED_BASE_DIR = "/opt/airflow/landed/met_office/station_observation_land"
 
 
 def main():
-    #schema
-    # array
-# Multiline description
-# [{
-# datetime: string
+    
+#schema
+# {
+#   "type": "array",
+#   "items": {
+#     "type": "object",
+#     "properties": {
+#       "station_geohash": { "type": "string" },
+#       "extracted_at": { "type": "string" },
+#       "data": {
+#         "type": "array",
+#         "items": {
+#           "type": "object",
+#           "properties": {
+#             "datetime": { "type": "string", "format": "date-time" },
+#             "visibility": { "type": ["integer", "null"] },
+#             "temperature": { "type": ["number", "null"] },
+#             "mslp": { "type": ["integer", "null"] },
+#             "wind_gust": { "type": ["number", "null"] },
+#             "wind_direction": { "type": ["string", "null"] },
+#             "wind_speed": { "type": ["number", "null"] },
+#             "humidity": { "type": ["integer", "null"] },
+#             "weather_code": { "type": ["integer", "null"] },
+#             "pressure_tendency": { "type": ["string", "null"] }
+#           }
+#         }
+#       }
+#     }
+#   }
+# }
 
-# Date of the observation.
-# humidity: integer┃null
 
-# Probability as a percentage of 100.
-# mslp: integer┃null
-
-# Mean surface level pressure in hPA.
-# pressure_tendency: string┃null
-
-# Pressure tendency representing Rising, Falling or Steady.
-# temperature: number┃null
-
-# Air temperature in °C.
-# visibility: integer┃null
-
-# Visibility in metres.
-# weather_code: integer┃null
-
-# Numerical code for the weather symbol.
-# wind_direction: string┃null
-
-# Direction the wind is travelling from in 16 point compass notation.
-# wind_gust: number┃null
-
-# Wind gust speed in m/s.
-# wind_speed: number┃null
-
-# Wind speed in m/s.
-# }] 
     print("scafolding")
 
 if __name__ == "__main__":
