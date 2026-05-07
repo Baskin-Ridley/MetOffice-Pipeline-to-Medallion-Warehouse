@@ -24,10 +24,12 @@ services:
       - AIRFLOW__DATABASE__LOAD_DEFAULT_CONNECTIONS=False
       - GCP_PROJECT_ID=${GCP_PROJECT_ID}
       - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
+      - PYTHONPATH=/opt/airflow
     volumes:
       # local
       - ./dags:/opt/airflow/dags
       - ./scripts:/opt/airflow/scripts
+      - ./common:/opt/airflow/common
       - ./logs:/opt/airflow/logs
       - ./keys:/opt/airflow/keys
       - ./seeds:/opt/airflow/seeds

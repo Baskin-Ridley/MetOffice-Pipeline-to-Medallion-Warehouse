@@ -1,8 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import current_timestamp, input_file_name, regexp_replace, regexp_extract, lit, sha2, concat_ws
 import uuid
-import glob
-import os
+from pathlib import Path
 
 # Base directory
 BRONZE_DIR = "/opt/airflow/bronze/met_office/station_observation_land"
@@ -11,7 +10,7 @@ LANDED_BASE_DIR = "/opt/airflow/landed/met_office/station_observation_land"
 
 
 def main():
-    
+
 #schema
 # {
 #   "type": "array",
@@ -41,8 +40,14 @@ def main():
 #     }
 #   }
 # }
+    print("connecting to spark...")
+    spark = SparkSession.builder \
+        .remote("sc://spark:15002") \
+        .appName("MetOffice Land Observations landed to bronze") \
+        .getOrCreate()
+    
 
-
+    
     print("scafolding")
 
 if __name__ == "__main__":

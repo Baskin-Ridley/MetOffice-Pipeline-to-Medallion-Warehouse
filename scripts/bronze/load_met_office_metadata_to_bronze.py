@@ -2,6 +2,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import current_timestamp, input_file_name, regexp_replace, regexp_extract, lit, sha2, concat_ws
 import uuid
 from pathlib import Path
+from common.file_utils import get_latest_version_paths
 
 # Base directory
 BRONZE_DIR = Path("/opt/airflow/bronze/met_office/station_metadata")
@@ -14,18 +15,19 @@ def main():
         .appName("MetOffice Metadata landed to bronze") \
         .getOrCreate()
 
-    landed_folders = sorted([f for f in LANDED_BASE_DIR.iterdir() if f.is_dir()])
-    latest_folder = landed_folders[-1] 
+    landed_pattern, version_id, output_path = get_latest_version_paths(
+            LANDED_BASE_DIR, 
+            BRONZE_DIR
+        )
+
     
-    LANDED_DIR = latest_folder / "*.json"
-    version_id = latest_folder.name
-    versioned_output_path = BRONZE_DIR / version_id
 
     df = ( 
         spark.read
         .option("multiline", "true") \
-        .json(str(LANDED_DIR))
+        .json(str(landed_pattern))
     )
+
 
     extraction_id = str(uuid.uuid4())
     df_bronze = df \
@@ -38,7 +40,7 @@ def main():
     new_column_order = ["station_name"] + [col for col in df_bronze.columns if col != "station_name"]
     df_bronze = df_bronze.select(*new_column_order)
 
-    print(f"Writing data to: {versioned_output_path}")
+    print(f"Writing data to: {output_path}")
     df_bronze.write.format("delta") \
      .mode("append") \
      .option("mergeSchema", "true") \
