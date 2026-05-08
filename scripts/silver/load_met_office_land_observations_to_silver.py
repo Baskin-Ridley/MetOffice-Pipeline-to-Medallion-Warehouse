@@ -10,14 +10,16 @@ def transform_to_silver(df):
     return df
 
 def main():
+    print("Connecting to Spark...")
     spark = SparkSession.builder \
         .remote("sc://spark:15002") \
         .appName("MetOffice Land Observations bronze to silver") \
         .config("spark.sql.extensions.delta", "org.apache.spark.sql.delta.DeltaSparkSessionExtension") \
         .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
         .getOrCreate()
-
+    print("Connected to Spark")
     spark.stop()
+    
 
 if __name__ == "__main__":
     main()
