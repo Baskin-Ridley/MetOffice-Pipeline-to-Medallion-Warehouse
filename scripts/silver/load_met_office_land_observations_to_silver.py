@@ -12,7 +12,8 @@ def transform_to_silver(df):
 
 def main():
     spark = start_spark_session("MetOffice Land Observations bronze to silver")
-    
+    spark.stop()
+
 
     
 

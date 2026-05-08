@@ -34,7 +34,6 @@ def start_spark_session(app_name: str) -> SparkSession:
         .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
         .getOrCreate()
     print("Connected to Spark")
-    spark.stop()
-
+    return spark
 
     
