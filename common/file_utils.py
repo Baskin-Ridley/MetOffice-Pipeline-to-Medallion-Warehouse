@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import Tuple
 
+from pyspark.sql import SparkSession
+
 def get_latest_version_paths(base_dir: str, target_dir: str) -> Tuple[str, str, str]:
     """
     Identifies the most recent subfolder and prepares paths for Spark.
@@ -22,3 +24,17 @@ def get_latest_version_paths(base_dir: str, target_dir: str) -> Tuple[str, str, 
     output_path = str(target_path / version_id)
 
     return landed_pattern, version_id, output_path
+
+def start_spark_session(app_name: str) -> SparkSession:
+    print("Connecting to Spark...")
+    spark = SparkSession.builder \
+        .remote("sc://spark:15002") \
+        .appName(app_name) \
+        .config("spark.sql.extensions.delta", "org.apache.spark.sql.delta.DeltaSparkSessionExtension") \
+        .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
+        .getOrCreate()
+    print("Connected to Spark")
+    spark.stop()
+
+
+    

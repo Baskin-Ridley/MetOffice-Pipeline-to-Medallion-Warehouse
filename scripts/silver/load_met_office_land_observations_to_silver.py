@@ -1,6 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import trim, col, upper, current_timestamp, lit, sha2, concat_ws
 from pathlib import Path
+from common.file_utils import start_spark_session
 
 BRONZE_DIR = Path("/opt/airflow/bronze/met_office/station_observation_land")
 SILVER_DIR = Path("/opt/airflow/silver/met_office/station_observation_land")
@@ -10,15 +11,9 @@ def transform_to_silver(df):
     return df
 
 def main():
-    print("Connecting to Spark...")
-    spark = SparkSession.builder \
-        .remote("sc://spark:15002") \
-        .appName("MetOffice Land Observations bronze to silver") \
-        .config("spark.sql.extensions.delta", "org.apache.spark.sql.delta.DeltaSparkSessionExtension") \
-        .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
-        .getOrCreate()
-    print("Connected to Spark")
-    spark.stop()
+    spark = start_spark_session("MetOffice Land Observations bronze to silver")
+    
+
     
 
 if __name__ == "__main__":
