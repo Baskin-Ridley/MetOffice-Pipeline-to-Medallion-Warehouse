@@ -51,7 +51,7 @@ def main():
         .option("mergeSchema", "true") \
         .trigger(availableNow=True) \
         .start(SILVER_DIR)
-
+    query.awaitTermination()
     print("New data successfully written to Silver layer!")
     spark.stop()
 
