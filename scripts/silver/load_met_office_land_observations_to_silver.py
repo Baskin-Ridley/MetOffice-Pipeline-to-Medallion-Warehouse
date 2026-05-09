@@ -9,19 +9,19 @@ SILVER_DIR = Path("/opt/airflow/silver/met_office/station_observation_land")
 def transform_to_silver(df):
     df_silver = df.select(
         trim(col("station_geohash")).alias("station_geohash"),
-        col("observation.datetime").alias("observation_datetime"),
-        col("observation.visibility").alias("visibility_m"),
-        col("observation.temperature").alias("temperature_c"),
-        col("observation.mslp").alias("mean_sea_level_pressure_hpa"),
-        col("observation.wind_gust").alias("wind_gust_ms"),
-        col("observation.wind_direction").alias("wind_direction"),
-        col("observation.wind_speed").alias("wind_speed_ms"),
-        col("observation.humidity").alias("humidity"),
-        col("observation.weather_code").alias("weather_code"),
-        col("observation.pressure_tendency").alias("pressure_tendency"),
+        col("datetime").alias("observation_datetime"),
+        col("visibility").alias("visibility_m"),
+        col("temperature").alias("temperature_c"),
+        col("mslp").alias("mean_sea_level_pressure_hpa"),
+        col("wind_gust").alias("wind_gust_ms"),
+        col("wind_direction").alias("wind_direction"),
+        col("wind_speed").alias("wind_speed_ms"),
+        col("humidity").alias("humidity"),
+        col("weather_code").alias("weather_code"),
+        col("pressure_tendency").alias("pressure_tendency"),
         # audit columns
         current_timestamp().alias("_processed_at"),
-        sha2(concat_ws("||", col("station_geohash"), col("observation.datetime"), col("observation.visibility"), col("observation.temperature"), col("observation.mslp"), col("observation.wind_gust"), col("observation.wind_direction"), col("observation.wind_speed"), col("observation.humidity"), col("observation.weather_code"), col("observation.pressure_tendency")), 256).alias("_row_hash"),
+        sha2(concat_ws("||", col("station_geohash"), col("datetime"), col("visibility"), col("temperature"), col("mslp"), col("wind_gust"), col("wind_direction"), col("wind_speed"), col("humidity"), col("weather_code"), col("pressure_tendency")), 256).alias("_row_hash"),
         lit("met_office").alias("_source_system")
     )
     print("Transformation to Silver layer complete. Schema:")
@@ -41,9 +41,6 @@ def main():
     query.awaitTermination()
     print("New data successfully written to Silver layer!")
     spark.stop()
-
-
-    
 
 if __name__ == "__main__":
     main()
