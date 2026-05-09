@@ -83,11 +83,10 @@ def main():
         .mode("append") \
         .option("mergeSchema", "true") \
         .save(str(BRONZE_DIR))
-        
-    print(f"Ingestion complete. Version {version_id} created.")
+    
+    print(f"Moved to bronze. Version {version_id} created.")
     
     df_bronze.printSchema()
-    df_bronze.show(10, truncate=False)
     
     spark.stop()
 
