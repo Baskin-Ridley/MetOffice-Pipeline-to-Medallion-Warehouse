@@ -3,6 +3,7 @@ from pyspark.sql.functions import from_utc_timestamp, date_format, current_times
 import uuid
 from pathlib import Path
 from common.file_utils import get_latest_version_paths
+import os
 
 # Base directory
 BRONZE_DIR = Path("/opt/airflow/bronze/met_office/station_metadata")
@@ -20,16 +21,15 @@ def main():
             BRONZE_DIR
         )
 
-    
-
     df = ( 
         spark.read
         .option("multiline", "true") \
         .json(str(landed_pattern))
     )
 
-
     extraction_id = str(uuid.uuid4())
+    business_keys = ["station_name", "area", "country", "geohash", "olson_time_zone", "region"]
+
     df_bronze = df \
         .withColumn("_source_file", regexp_replace(input_file_name(), "%20", " ")) \
         .withColumn("station_name", regexp_extract("_source_file", r"([^/]+)(?=\.json$)", 1)) \
@@ -42,16 +42,24 @@ def main():
         .withColumn("_extraction_id", lit(extraction_id)) \
         .withColumn("_row_hash", sha2(concat_ws("||", *df.columns), 256))
 
+    if os.path.exists(BRONZE_DIR) and len(os.listdir(BRONZE_DIR)) > 0:
+        print("Checking for existing records in Bronze...")
+        df_existing = spark.read.format("delta").load(str(BRONZE_DIR))
+        df_bronze = df_bronze.join(df_existing, on=business_keys, how="left_anti")
+
     new_column_order = ["station_name"] + [col for col in df_bronze.columns if col != "station_name"]
     df_bronze = df_bronze.select(*new_column_order)
 
-    print(f"Writing data to: {output_path}")
-    df_bronze.write.format("delta") \
-     .mode("append") \
-     .option("mergeSchema", "true") \
-     .save(str(BRONZE_DIR))
+    if df_bronze.count() > 0:
+        print(f"Writing {df_bronze.count()} new records to: {output_path}")
+        df_bronze.write.format("delta") \
+         .mode("append") \
+         .option("mergeSchema", "true") \
+         .save(str(BRONZE_DIR))
+        print(f"Moved to bronze. Version {version_id} created.")
+    else:
+        print("No new data combinations found. Skipping write.")
     
-    print(f"Moved to bronze. Version {version_id} created.")
     df_bronze.printSchema()
     df_bronze.show(10, truncate=False)
     

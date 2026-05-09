@@ -3,6 +3,7 @@ from pyspark.sql.functions import current_timestamp, date_format, from_utc_times
 import uuid
 from pathlib import Path
 from common.file_utils import get_latest_version_paths
+import os
 
 # Base directory
 BRONZE_DIR = Path("/opt/airflow/bronze/met_office/station_observation_land")
@@ -56,13 +57,14 @@ def main():
         .json(str(landed_pattern))
     )
 
-
     df_exploded = df.withColumn("observation", explode(col("data"))) \
         .select(
             col("station_geohash"),
             col("extracted_at"),
             col("observation.*")
         )
+
+    incremental_keys = ["station_geohash", "datetime"]
 
     extraction_id = str(uuid.uuid4())
     
@@ -76,18 +78,25 @@ def main():
         ) \
         .withColumn("_extraction_id", lit(extraction_id)) \
         .withColumn("_row_hash", sha2(concat_ws("||", *df_exploded.columns), 256))
-    
-    print(f"Writing data to: {output_path}")
 
-    df_bronze.write.format("delta") \
-        .mode("append") \
-        .option("mergeSchema", "true") \
-        .save(str(BRONZE_DIR))
-    
-    print(f"Moved to bronze. Version {version_id} created.")
+    if os.path.exists(BRONZE_DIR) and len(os.listdir(BRONZE_DIR)) > 0:
+        print("Checking for existing observations in Bronze...")
+        df_existing = spark.read.format("delta").load(str(BRONZE_DIR))
+        # Remove records that already exist for that station and time
+        df_bronze = df_bronze.join(df_existing, on=incremental_keys, how="left_anti")
+
+    new_records_count = df_bronze.count()
+    if new_records_count > 0:
+        print(f"Writing {new_records_count} new records to: {output_path}")
+        df_bronze.write.format("delta") \
+            .mode("append") \
+            .option("mergeSchema", "true") \
+            .save(str(BRONZE_DIR))
+        print(f"Moved to bronze. Version {version_id} created.")
+    else:
+        print("No new observations found. Skipping write.")
     
     df_bronze.printSchema()
-    
     spark.stop()
 
 if __name__ == "__main__":

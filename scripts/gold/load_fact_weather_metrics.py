@@ -53,9 +53,10 @@ def main():
     query = df_gold.writeStream.format("delta") \
         .outputMode("append") \
         .option("checkpointLocation", str(GOLD_DIR / "_checkpoints")) \
+        .option("path", str(GOLD_DIR)) \
         .option("mergeSchema", "true") \
         .trigger(availableNow=True) \
-        .start(str(GOLD_DIR))
+        .toTable("FactWeatherMetrics") 
     print("Gold layer schema:")
     df_gold.printSchema()
     query.awaitTermination()

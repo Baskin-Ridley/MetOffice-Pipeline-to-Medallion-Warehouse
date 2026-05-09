@@ -87,7 +87,7 @@ def main():
         else:
             print(f"Failed to fetch metadata for station: {station_name}")
         
-        time.sleep(1)  # Sleep to respect API rate limits
+        time.sleep(0.5)  
 
 if __name__ == "__main__":
     main()
