@@ -16,7 +16,7 @@ def transform_to_silver(df):
         col("wind_gust").alias("wind_gust_ms"),
         col("wind_direction").alias("wind_direction"),
         col("wind_speed").alias("wind_speed_ms"),
-        col("humidity").alias("humidity"),
+        col("humidity").alias("humidity_percentage"),
         col("weather_code").alias("weather_code"),
         col("pressure_tendency").alias("pressure_tendency"),
         # audit columns
