@@ -5,7 +5,7 @@ from common.file_utils import start_spark_session
 
 # Base directories
 STATION_OBSERVATIONS_LAND_SILVER_DIR = Path("/opt/airflow/silver/met_office/station_observation_land") #in the gold layer you often take data from multiple sources so using a different name to be extensible.
-GOLD_DIR = Path("/opt/airflow/gold/met_office/weather_metrics")
+GOLD_DIR = Path("/opt/airflow/gold/weather/weather_metrics")
 
 def transform_to_gold(df):
     descriptions = {
