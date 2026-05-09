@@ -24,11 +24,11 @@ def transform_to_gold(df):
             'Visibility', cast(visibility_m as string), 'm',
             'Temperature', cast(temperature_c as string), 'C',
             'Pressure', cast(mean_sea_level_pressure_hpa as string), 'hPa',
-            'WindGust', cast(wind_gust_ms as string), 'm/s',
-            'WindDirection', cast(wind_direction as string), 'text',
-            'WindSpeed', cast(wind_speed_ms as string), 'm/s',
+            'Wind Gust', cast(wind_gust_ms as string), 'm/s',
+            'Wind Direction', cast(wind_direction as string), 'text',
+            'Wind Speed', cast(wind_speed_ms as string), 'm/s',
             'Humidity', cast(humidity_percentage as string), '%',
-            'WeatherCode', cast(weather_code as string), 'code'
+            'Weather Code', cast(weather_code as string), 'code'
         ) as (MetricName, RawValue, Unit)
     """
     df_gold = df.select(
