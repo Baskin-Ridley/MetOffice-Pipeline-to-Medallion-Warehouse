@@ -1,5 +1,4 @@
 from pyspark.sql import SparkSession
-# Added date_format to imports
 from pyspark.sql.functions import expr, trim, col, upper, current_timestamp, lit, sha2, concat_ws, when, date_format 
 from pathlib import Path
 from common.file_utils import start_spark_session
