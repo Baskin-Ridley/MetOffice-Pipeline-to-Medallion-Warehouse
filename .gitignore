@@ -226,3 +226,5 @@ cache/
 logs/
 
 .bruin.yml
+
+.archive/
