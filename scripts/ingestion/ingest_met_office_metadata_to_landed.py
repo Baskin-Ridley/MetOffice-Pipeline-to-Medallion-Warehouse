@@ -10,7 +10,7 @@ from datetime import datetime
 SEEDS_FILE = "seeds/met_office_weather_stations_seed.csv"
 LANDED_DIR = "landed/met_office/station_metadata"  
 API_KEY = open(os.getenv("MET_OFFICE_API_KEY")).read().strip()
-HEADERS = {"apikey": API_KEY} # met office expects key to be in header
+HEADERS = {"apikey": API_KEY} 
 BASE_URL = "https://data.hub.api.metoffice.gov.uk/observation-land/1/nearest"
 
 def fetch_met_office_metadata (lat: float, lon: float) -> Optional[Dict]:
@@ -35,22 +35,28 @@ def fetch_met_office_metadata (lat: float, lon: float) -> Optional[Dict]:
         return None
     
 def get_run_timestamp() -> str: 
-    return new_func()
-
-def new_func():
     return datetime.now().astimezone().strftime("%Y%m%d_%H%M%S%z")
 
-def save_metadata_to_landed(station_name: str, metadata: Dict, run_timestamp: str):
+def save_metadata_to_landed(station_name: str, latitude: float, longitude: float, region: str, country_code: str, station_type: str, metadata: Dict, run_timestamp: str):
     target_dir = os.path.join(LANDED_DIR, run_timestamp)
-    
     os.makedirs(target_dir, exist_ok=True)
+    
+    # Merge all fields into a single flat dictionary
+    output_data = {
+        "station_name": station_name,
+        "latitude": latitude,
+        "longitude": longitude,
+        "region": region,
+        "country_code": country_code,
+        "station_type": station_type,
+        **metadata  # This unpacks the API response fields to the top level
+    }
     
     file_path = os.path.join(target_dir, f"{station_name}.json")
     with open(file_path, "w") as f:
-        json.dump(metadata, f, indent=4)
+        json.dump(output_data, f, indent=4)
 
 def main():
-    # load seeds
     seeds_df = (
         pl.read_csv(SEEDS_FILE)
         .filter(pl.col("is_monitored") == 1)
@@ -73,16 +79,18 @@ def main():
 
     run_timestamp = get_run_timestamp()
     for row in seeds_df.head(3).iter_rows(named=True):
-    #for row in seeds_df.iter_rows(named=True):
         station_name = row["station_name"]
-        lat = row["latitude"]
-        lon = row["longitude"]
-        
-        print(f"Fetching metadata for station: {station_name} at coordinates: ({lat}, {lon})")
-        metadata = fetch_met_office_metadata(lat, lon)
+        latitude = row["latitude"]
+        longitude = row["longitude"]
+        region = row["region"]
+        country_code = row["country_code"]
+        station_type = row["station_type"]
+
+        print(f"Fetching metadata for station: {station_name} at coordinates: ({latitude}, {longitude})")
+        metadata = fetch_met_office_metadata(latitude, longitude)
         
         if metadata:
-            save_metadata_to_landed(station_name, metadata, run_timestamp)
+            save_metadata_to_landed(station_name, latitude, longitude, region, country_code, station_type, metadata, run_timestamp)
             print(f"Metadata for station {station_name} saved to landed zone.")
         else:
             print(f"Failed to fetch metadata for station: {station_name}")
