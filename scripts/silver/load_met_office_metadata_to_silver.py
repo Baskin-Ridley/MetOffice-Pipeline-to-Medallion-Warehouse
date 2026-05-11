@@ -14,8 +14,12 @@ def transform_to_silver(df):
     df_silver = df.select(
         trim(col("station_name")).alias("station_name"),
         trim(col("geohash")).alias("station_geohash"),
+        col("latitude").cast("double"),
+        col("longitude").cast("double"),
         trim(col("area")).alias("county_name"),
         trim(col("country")).alias("country_name"),
+        trim(col("country_code")).alias("country_code"),
+        trim(col("station_type")).alias("station_type"),
         trim(col("olson_time_zone")).alias("olson_time_zone"),
         upper(trim(col("region"))).alias("region_code"),
         # audit columns
