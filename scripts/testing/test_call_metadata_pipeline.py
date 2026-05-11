@@ -14,4 +14,7 @@ subprocess.check_call(["python", "scripts/silver/load_met_office_land_observatio
 print("load_met_office_land_observations_to_silver.py complete")
 subprocess.check_call(["python", "scripts/gold/load_fact_weather_metrics.py"])
 print("load_fact_weather_metrics.py complete")
+subprocess.check_call(["python", "scripts/gold/load_dim_weather_stations.py"])
+print("load_dim_weather_stations.py complete")
+subprocess.check_call(["python", "scripts/gold/load_dim_date.py"])
 print("done")
