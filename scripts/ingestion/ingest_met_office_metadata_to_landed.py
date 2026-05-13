@@ -6,11 +6,14 @@ from typing import Dict, Optional
 import json
 from datetime import datetime
 from upath import UPath as Path
+from dotenv import load_dotenv
 
 # configure
 SEEDS_FILE = Path("/opt/airflow/seeds/met_office_weather_stations_seed.csv")
 LANDED_DIR = Path("/opt/airflow/landed/met_office/station_metadata")  
-API_KEY = open(os.getenv("MET_OFFICE_API_KEY")).read().strip()
+#API_KEY = open(os.getenv("MET_OFFICE_API_KEY_PATH")).read().strip()
+load_dotenv()
+API_KEY = os.getenv("MET_OFFICE_API_KEY")
 HEADERS = {"apikey": API_KEY} 
 BASE_URL = "https://data.hub.api.metoffice.gov.uk/observation-land/1/nearest"
 
