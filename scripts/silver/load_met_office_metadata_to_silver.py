@@ -1,8 +1,8 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import trim, col, upper, current_timestamp, lit, sha2, concat_ws
-
-BRONZE_DIR = "/opt/airflow/bronze/met_office/station_metadata"
-SILVER_DIR = "/opt/airflow/silver/met_office/station_metadata"
+from upath import UPath as Path
+BRONZE_DIR = Path("/opt/airflow/bronze/met_office/station_metadata")
+SILVER_DIR = Path("/opt/airflow/silver/met_office/station_metadata")
 
 # station_name       |area          |country|geohash|olson_time_zone|region|_source_file                                                                                   |_processed_at          |_extraction_id                      |_row_hash                                                       |
 # -------------------+--------------+-------+-------+---------------+------+-----------------------------------------------------------------------------------------------+-----------------------+------------------------------------+----------------------------------------------------------------+
@@ -46,7 +46,7 @@ def main():
     
     print("Connected to Spark")
 
-    df = spark.readStream.format("delta").load(BRONZE_DIR)
+    df = spark.readStream.format("delta").load(str(BRONZE_DIR))
     
     df_silver = transform_to_silver(df)
     query = df_silver.writeStream.format("delta") \
@@ -54,7 +54,7 @@ def main():
         .option("checkpointLocation", "/opt/airflow/silver/met_office/station_metadata/_checkpoints") \
         .option("mergeSchema", "true") \
         .trigger(availableNow=True) \
-        .start(SILVER_DIR)
+        .start(str(SILVER_DIR))
     query.awaitTermination()
     print("New data successfully written to Silver layer!")
     spark.stop()

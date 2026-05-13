@@ -7,10 +7,12 @@ from google.cloud import storage
 from dotenv import load_dotenv
 from deltalake import DeltaTable
 import polars as pl
+from upath import UPath as Path
+
 
 # configure
-LANDED_DIR = "landed/met_office/station_observation_land"
-METADATA_DIR = "silver/met_office/station_metadata"  
+LANDED_DIR = Path("/opt/airflow/landed/met_office/station_observation_land")
+METADATA_DIR = Path("/opt/airflow/silver/met_office/station_metadata")
 API_KEY = open(os.getenv("MET_OFFICE_API_KEY")).read().strip()
 HEADERS = {"apikey": API_KEY} # met office expects key to be in header
 BASE_URL = "https://data.hub.api.metoffice.gov.uk/observation-land/1/"

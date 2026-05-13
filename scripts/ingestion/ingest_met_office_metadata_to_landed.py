@@ -5,10 +5,11 @@ import os
 from typing import Dict, Optional
 import json
 from datetime import datetime
+from upath import UPath as Path
 
 # configure
-SEEDS_FILE = "seeds/met_office_weather_stations_seed.csv"
-LANDED_DIR = "landed/met_office/station_metadata"  
+SEEDS_FILE = Path("/opt/airflow/seeds/met_office_weather_stations_seed.csv")
+LANDED_DIR = Path("/opt/airflow/landed/met_office/station_metadata")  
 API_KEY = open(os.getenv("MET_OFFICE_API_KEY")).read().strip()
 HEADERS = {"apikey": API_KEY} 
 BASE_URL = "https://data.hub.api.metoffice.gov.uk/observation-land/1/nearest"
@@ -41,7 +42,6 @@ def save_metadata_to_landed(station_name: str, latitude: float, longitude: float
     target_dir = os.path.join(LANDED_DIR, run_timestamp)
     os.makedirs(target_dir, exist_ok=True)
     
-    # Merge all fields into a single flat dictionary
     output_data = {
         "station_name": station_name,
         "latitude": latitude,
@@ -49,7 +49,7 @@ def save_metadata_to_landed(station_name: str, latitude: float, longitude: float
         "region": region,
         "country_code": country_code,
         "station_type": station_type,
-        **metadata  # This unpacks the API response fields to the top level
+        **metadata  
     }
     
     file_path = os.path.join(target_dir, f"{station_name}.json")
