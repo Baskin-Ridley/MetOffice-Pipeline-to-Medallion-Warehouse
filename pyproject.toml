@@ -13,4 +13,6 @@ dependencies = [
     "pyspark[connect]==3.5.3",
     "delta-spark==3.2.0",
     "deltalake>=1.5.1",
+    "universal-pathlib>=0.3.10",
+    "gcsfs>=2026.5.0",
 ]

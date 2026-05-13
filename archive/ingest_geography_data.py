@@ -2,7 +2,7 @@ import gzip
 import json
 import httpx
 from datetime import datetime
-from pathlib import Path
+from upath import UPath as Path
 import polars as pl
 
 # Configuration

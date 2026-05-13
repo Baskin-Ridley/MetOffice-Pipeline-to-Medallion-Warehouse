@@ -3,7 +3,7 @@ from pyspark.sql.functions import (
     explode, sequence, to_date, col, date_format, 
     year, month, dayofmonth, quarter, when, lit
 )
-from pathlib import Path
+from upath import UPath as Path
 from common.file_utils import start_spark_session
 
 GOLD_DIM_DIR = Path("/opt/airflow/gold/master/dim_date")

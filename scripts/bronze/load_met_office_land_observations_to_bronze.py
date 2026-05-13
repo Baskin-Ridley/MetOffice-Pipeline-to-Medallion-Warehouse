@@ -1,7 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import current_timestamp, date_format, from_utc_timestamp, input_file_name, regexp_replace, regexp_extract, lit, sha2, concat_ws, explode, col
 import uuid
-from pathlib import Path
+from upath import UPath as Path
 from common.file_utils import get_latest_version_paths
 import os
 

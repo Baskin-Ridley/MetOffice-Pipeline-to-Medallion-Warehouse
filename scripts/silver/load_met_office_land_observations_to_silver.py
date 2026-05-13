@@ -1,6 +1,6 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import trim, col, upper, current_timestamp, lit, sha2, concat_ws
-from pathlib import Path
+from upath import UPath as Path
 from common.file_utils import start_spark_session
 
 BRONZE_DIR = Path("/opt/airflow/bronze/met_office/station_observation_land")

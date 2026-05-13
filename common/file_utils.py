@@ -1,4 +1,4 @@
-from pathlib import Path
+from upath import UPath as Path
 from typing import Tuple
 
 from pyspark.sql import SparkSession

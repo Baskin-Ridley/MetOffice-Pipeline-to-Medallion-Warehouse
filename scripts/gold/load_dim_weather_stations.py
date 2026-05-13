@@ -1,5 +1,5 @@
 from pyspark.sql.functions import col, lit, current_timestamp
-from pathlib import Path
+from upath import UPath as Path
 from common.file_utils import start_spark_session
 
 STATION_METADATA_SILVER_DIR = Path("/opt/airflow/silver/met_office/station_metadata")
