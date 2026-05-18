@@ -1,9 +1,12 @@
+import os
 from pyspark.sql.functions import col, lit, current_timestamp
 from upath import UPath as Path
 from common.file_utils import start_spark_session
 
-STATION_METADATA_SILVER_DIR = Path("/opt/airflow/silver/met_office/station_metadata")
-GOLD_DIR = Path("/opt/airflow/gold/weather/dim_weather_stations")
+DATALAKE_ROOT = Path(os.getenv("DATALAKE_ROOT", "/opt/airflow"))
+
+STATION_METADATA_SILVER_DIR = DATALAKE_ROOT / "silver/met_office/station_metadata"
+GOLD_DIR = DATALAKE_ROOT / "gold/weather/dim_weather_stations"
 
 def main():
     spark = start_spark_session("MetOffice Weather Stations Gold Dimension")

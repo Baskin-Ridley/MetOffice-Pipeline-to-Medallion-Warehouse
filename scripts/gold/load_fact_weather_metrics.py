@@ -1,11 +1,14 @@
+import os
+
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import expr, trim, col, upper, current_timestamp, lit, sha2, concat_ws, when, date_format 
 from upath import UPath as Path
 from common.file_utils import start_spark_session
 
 # Base directories
-STATION_OBSERVATIONS_LAND_SILVER_DIR = Path("/opt/airflow/silver/met_office/station_observation_land")
-GOLD_DIR = Path("/opt/airflow/gold/weather/weather_metrics")
+DATALAKE_ROOT = Path(os.getenv("DATALAKE_ROOT", "/opt/airflow"))
+STATION_OBSERVATIONS_LAND_SILVER_DIR = DATALAKE_ROOT / "silver/met_office/station_observation_land"
+GOLD_DIR = DATALAKE_ROOT / "gold/weather/weather_metrics"
 
 def transform_to_gold(df):
     descriptions = {

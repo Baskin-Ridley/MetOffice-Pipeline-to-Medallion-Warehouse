@@ -1,3 +1,5 @@
+import os
+
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import (
     explode, sequence, to_date, col, date_format, 
@@ -6,7 +8,8 @@ from pyspark.sql.functions import (
 from upath import UPath as Path
 from common.file_utils import start_spark_session
 
-GOLD_DIM_DIR = Path("/opt/airflow/gold/master/dim_date")
+DATALAKE_ROOT = Path(os.getenv("DATALAKE_ROOT", "/opt/airflow"))
+GOLD_DIM_DIR = DATALAKE_ROOT / "gold/master/dim_date"
 
 def generate_dim_date(spark, start_date="2020-01-01", end_date="2031-12-31"):
     """
