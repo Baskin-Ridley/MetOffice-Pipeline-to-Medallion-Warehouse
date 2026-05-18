@@ -3,6 +3,8 @@ name: noaa-medallion-pipeline
 services:
   postgres:
     image: postgres:15-alpine
+    ports:
+      - "5432:5432"
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "airflow"]
       interval: 10s

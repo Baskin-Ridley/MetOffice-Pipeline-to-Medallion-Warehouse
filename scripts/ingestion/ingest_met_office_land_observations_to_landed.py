@@ -11,10 +11,11 @@ from upath import UPath as Path
 
 
 # configure
-LANDED_DIR = Path("/opt/airflow/landed/met_office/station_observation_land")
-METADATA_DIR = Path("/opt/airflow/silver/met_office/station_metadata")
-#API_KEY = open(os.getenv("MET_OFFICE_API_KEY_PATH")).read().strip()
 load_dotenv()
+DATALAKE_ROOT = Path(os.getenv("DATALAKE_ROOT", "/opt/airflow"))
+LANDED_DIR = DATALAKE_ROOT / "landed/met_office/station_observation_land"
+METADATA_DIR = DATALAKE_ROOT / "silver/met_office/station_metadata"
+#API_KEY = open(os.getenv("MET_OFFICE_API_KEY_PATH")).read().strip()
 API_KEY = os.getenv("MET_OFFICE_API_KEY")
 HEADERS = {"apikey": API_KEY} # met office expects key to be in header
 BASE_URL = "https://data.hub.api.metoffice.gov.uk/observation-land/1/"

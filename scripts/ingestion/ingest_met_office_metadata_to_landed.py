@@ -9,10 +9,13 @@ from upath import UPath as Path
 from dotenv import load_dotenv
 
 # configure
-SEEDS_FILE = Path("/opt/airflow/seeds/met_office_weather_stations_seed.csv")
-LANDED_DIR = Path("/opt/airflow/landed/met_office/station_metadata")  
-#API_KEY = open(os.getenv("MET_OFFICE_API_KEY_PATH")).read().strip()
 load_dotenv()
+
+DATALAKE_ROOT = Path(os.getenv("DATALAKE_ROOT", "/opt/airflow"))
+SEEDS_FILE = DATALAKE_ROOT / "seeds/met_office_weather_stations_seed.csv"
+LANDED_DIR = DATALAKE_ROOT / "landed/met_office/station_metadata"
+#API_KEY = open(os.getenv("MET_OFFICE_API_KEY_PATH")).read().strip()
+
 API_KEY = os.getenv("MET_OFFICE_API_KEY")
 HEADERS = {"apikey": API_KEY} 
 BASE_URL = "https://data.hub.api.metoffice.gov.uk/observation-land/1/nearest"
@@ -43,7 +46,7 @@ def get_run_timestamp() -> str:
 
 def save_metadata_to_landed(station_name: str, latitude: float, longitude: float, region: str, country_code: str, station_type: str, metadata: Dict, run_timestamp: str):
     target_dir = os.path.join(LANDED_DIR, run_timestamp)
-    os.makedirs(target_dir, exist_ok=True)
+    #os.makedirs(target_dir, exist_ok=True) removed to proof for GCS integration
     
     output_data = {
         "station_name": station_name,
@@ -55,8 +58,10 @@ def save_metadata_to_landed(station_name: str, latitude: float, longitude: float
         **metadata  
     }
     
-    file_path = os.path.join(target_dir, f"{station_name}.json")
-    with open(file_path, "w") as f:
+    file_path = LANDED_DIR / run_timestamp / f"{station_name}.json"
+    file_path.parent.mkdir(parents=True, exist_ok=True) 
+
+    with file_path.open("w") as f:
         json.dump(output_data, f, indent=4)
 
 def main():

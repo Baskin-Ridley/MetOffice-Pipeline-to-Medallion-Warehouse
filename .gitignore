@@ -228,3 +228,17 @@ logs/
 .bruin.yml
 
 .archive/
+
+terraform/.terraform/
+
+terraform/.terraform.lock.hcl
+
+terraform/*.tfstate
+terraform/*.tfstate.backup
+terraform/*.tfstate.lock.info
+
+terraform/crash.log
+terraform/crash.*.log
+
+terraform/*.tfvars
+terraform/*.tfvars.json
