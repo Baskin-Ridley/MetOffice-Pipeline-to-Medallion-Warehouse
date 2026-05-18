@@ -1,0 +1,16 @@
+steps:
+  - name: 'docker/compose:latest'
+    args: ['up', '-d']
+    id: 'start-containers'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        chmod +x ./scripts/testing/docker_test.sh
+        ./scripts/testing/docker_test.sh
+    id: 'run-pipeline-test'
+
+# Elevate the timeout limit if your Airflow setup takes a minute to initialize
+timeout: '600s'
