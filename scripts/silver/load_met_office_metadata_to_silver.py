@@ -1,9 +1,12 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import trim, col, upper, current_timestamp, lit, sha2, concat_ws
 from upath import UPath as Path
-BRONZE_DIR = Path("/opt/airflow/bronze/met_office/station_metadata")
-SILVER_DIR = Path("/opt/airflow/silver/met_office/station_metadata")
+import os
 
+DATALAKE_ROOT = Path(os.getenv("DATALAKE_ROOT", "/opt/airflow"))
+
+BRONZE_DIR = DATALAKE_ROOT / "bronze/met_office/station_metadata"
+SILVER_DIR = DATALAKE_ROOT / "silver/met_office/station_metadata"
 # station_name       |area          |country|geohash|olson_time_zone|region|_source_file                                                                                   |_processed_at          |_extraction_id                      |_row_hash                                                       |
 # -------------------+--------------+-------+-------+---------------+------+-----------------------------------------------------------------------------------------------+-----------------------+------------------------------------+----------------------------------------------------------------+
 # Great Dun Fell No 2|Cumbria       |England|gcwr04 |Europe/London  |nw    |file:///opt/airflow/landed/met_office/station_metadata/20260504_135700/Great Dun Fell No 2.json|2026-05-04 13:57:09.257|a9f89f5c-ee4c-45b4-9f62-4e32fd1894bd|c15b37d359b5b256ba50fe7744a8cc22e8c65dbb4a9c20c5f20b41cc4701dd25|
@@ -51,7 +54,7 @@ def main():
     df_silver = transform_to_silver(df)
     query = df_silver.writeStream.format("delta") \
         .outputMode("append") \
-        .option("checkpointLocation", "/opt/airflow/silver/met_office/station_metadata/_checkpoints") \
+        .option("checkpointLocation", str(SILVER_DIR / "_checkpoints")) \
         .option("mergeSchema", "true") \
         .trigger(availableNow=True) \
         .start(str(SILVER_DIR))

@@ -10,15 +10,19 @@ def get_latest_version_paths(base_dir: str, target_dir: str) -> Tuple[str, str, 
     base_path = Path(base_dir)
     target_path = Path(target_dir)
 
-    # Get sorted directories
+    if not base_path.exists():
+        raise FileNotFoundError(
+            f"The directory '{base_dir}' does not exist. "
+            f"Ensure your ingestion script has run successfully to create this path."
+        )
+
     folders = sorted([f for f in base_path.iterdir() if f.is_dir()])
     
     if not folders:
-        raise FileNotFoundError(f"No subfolders found in {base_dir}")
+        raise FileNotFoundError(f"No subfolders found inside '{base_dir}'")
 
     latest_folder = folders[-1]
     
-    # Return as strings for Spark compatibility
     landed_pattern = str(latest_folder / "*.json")
     version_id = latest_folder.name
     output_path = str(target_path / version_id)

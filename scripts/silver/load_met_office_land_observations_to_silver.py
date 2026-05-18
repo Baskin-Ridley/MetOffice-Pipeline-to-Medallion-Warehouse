@@ -1,10 +1,14 @@
+import os
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import trim, col, upper, current_timestamp, lit, sha2, concat_ws
 from upath import UPath as Path
 from common.file_utils import start_spark_session
 
-BRONZE_DIR = Path("/opt/airflow/bronze/met_office/station_observation_land")
-SILVER_DIR = Path("/opt/airflow/silver/met_office/station_observation_land")
+
+DATALAKE_ROOT = Path(os.getenv("DATALAKE_ROOT", "/opt/airflow"))
+
+BRONZE_DIR = DATALAKE_ROOT / "bronze/met_office/station_observation_land"
+SILVER_DIR = DATALAKE_ROOT / "silver/met_office/station_observation_land"
 
 def transform_to_silver(df):
     df_silver = df.select(
