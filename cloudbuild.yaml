@@ -13,4 +13,4 @@ steps:
     id: 'run-pipeline-test'
 
 # Elevate the timeout limit if your Airflow setup takes a minute to initialize
-timeout: '600s'
+timeout: '18000s'
