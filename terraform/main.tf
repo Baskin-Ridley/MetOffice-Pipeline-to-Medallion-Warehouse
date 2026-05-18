@@ -11,6 +11,13 @@ terraform {
 provider "google" {
   project = var.project_id
   region  = var.region
+  credentials = var.gcp_credentials_json
+}
+
+variable "gcp_credentials_json" {
+  type        = string
+  description = "The raw string content of the GCP JSON key file"
+  sensitive   = true 
 }
 
 # Plural 'locals' block is used only for declaring variables
