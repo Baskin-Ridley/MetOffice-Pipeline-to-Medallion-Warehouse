@@ -6,9 +6,10 @@ from common.file_utils import get_latest_version_paths
 import os
 
 # Base directory
-BRONZE_DIR = Path("/opt/airflow/bronze/met_office/station_observation_land")
-LANDED_BASE_DIR = Path("/opt/airflow/landed/met_office/station_observation_land")
+DATALAKE_ROOT = Path(os.getenv("DATALAKE_ROOT", "/opt/airflow"))
 
+BRONZE_DIR = DATALAKE_ROOT / "bronze/met_office/station_observation_land"
+LANDED_BASE_DIR = DATALAKE_ROOT / "landed/met_office/station_observation_land"
 def main():
 #schema
 # {
@@ -79,7 +80,8 @@ def main():
         .withColumn("_extraction_id", lit(extraction_id)) \
         .withColumn("_row_hash", sha2(concat_ws("||", *df_exploded.columns), 256))
 
-    if os.path.exists(BRONZE_DIR) and len(os.listdir(BRONZE_DIR)) > 0:
+    #if os.path.exists(BRONZE_DIR) and len(os.listdir(BRONZE_DIR)) > 0: updating to proof for GCS integration
+    if BRONZE_DIR.exists() and any(BRONZE_DIR.iterdir()):
         print("Checking for existing observations in Bronze...")
         df_existing = spark.read.format("delta").load(str(BRONZE_DIR))
         # Remove records that already exist for that station and time

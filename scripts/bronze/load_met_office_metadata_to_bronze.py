@@ -6,8 +6,10 @@ from common.file_utils import get_latest_version_paths
 import os
 
 # Base directory
-BRONZE_DIR = Path("/opt/airflow/bronze/met_office/station_metadata")
-LANDED_BASE_DIR = Path("/opt/airflow/landed/met_office/station_metadata")
+DATALAKE_ROOT = Path(os.getenv("DATALAKE_ROOT", "/opt/airflow"))
+
+BRONZE_DIR = DATALAKE_ROOT / "bronze/met_office/station_metadata"
+LANDED_BASE_DIR = DATALAKE_ROOT / "landed/met_office/station_metadata"
 
 def main():
     print("connecting to spark...")
@@ -42,7 +44,8 @@ def main():
         .withColumn("_extraction_id", lit(extraction_id)) \
         .withColumn("_row_hash", sha2(concat_ws("||", *df.columns), 256))
 
-    if os.path.exists(BRONZE_DIR) and len(os.listdir(BRONZE_DIR)) > 0:
+    #if os.path.exists(BRONZE_DIR) and len(os.listdir(BRONZE_DIR)) > 0: update to proof for GCS integration
+    if BRONZE_DIR.exists() and any(BRONZE_DIR.iterdir()):
         print("Checking for existing records in Bronze...")
         df_existing = spark.read.format("delta").load(str(BRONZE_DIR))
         df_bronze = df_bronze.join(df_existing, on=business_keys, how="left_anti")
