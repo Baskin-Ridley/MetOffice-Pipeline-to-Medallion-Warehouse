@@ -39,7 +39,7 @@ def transform_to_gold(df):
     
     df_gold = df.select(
         trim(col("station_geohash").cast("string")).alias("StationKey"),
-        date_format(col("observation_datetime"), "yyyyMMdd").alias("DateKey"),
+        date_format(col("observation_datetime"), "yyyyMMdd").cast("int").alias("DateKey"),
         col("observation_datetime").cast("timestamp").cast("string").substr(12, 8).alias("ObservationTime"),
         expr(unpivot_expr),
         expr("try_cast(RawValue as double)").alias("ValueNumeric"),
