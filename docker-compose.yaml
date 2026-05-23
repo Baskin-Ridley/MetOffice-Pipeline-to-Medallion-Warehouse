@@ -91,13 +91,23 @@ services:
   spark:
     image: deltaio/delta-docker:4.0.1
     user: root
+    env_file:
+      - .env
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
+      - GCP_PROJECT_ID=${GCP_PROJECT_ID}
     # Force the image to ignore the "Choose an Interface" interactive menu
     entrypoint: ["/opt/spark/bin/spark-submit"]
     command: >
-      --packages io.delta:delta-spark_2.13:4.0.0
+      --packages com.google.cloud.bigdataoss:gcs-connector:hadoop3-2.2.10,io.delta:delta-spark_2.13:4.0.0
       --conf spark.sql.extensions=io.delta.sql.DeltaSparkSessionExtension 
       --conf spark.sql.catalog.spark_catalog=org.apache.spark.sql.delta.catalog.DeltaCatalog 
       --conf spark.sql.catalog.spark_catalog.warehouse=/opt/spark/spark-warehouse
+      --conf spark.hadoop.fs.gs.impl=com.google.cloud.hadoop.fs.gcs.GoogleHadoopFileSystem
+      --conf spark.hadoop.fs.AbstractFileSystem.gs.impl=com.google.cloud.hadoop.fs.gcs.GoogleHadoopFS
+      --conf spark.hadoop.google.cloud.auth.service.account.enable=true
+      --conf spark.hadoop.google.cloud.auth.service.account.json.keyfile=$GOOGLE_APPLICATION_CREDENTIALS
+      --conf spark.hadoop.fs.gs.project.id=$GCP_PROJECT_ID
       --conf spark.driver.bindAddress=0.0.0.0
       --class org.apache.spark.sql.connect.service.SparkConnectServer 
       spark-internal
@@ -109,6 +119,7 @@ services:
       - bronze-vol:/opt/airflow/bronze
       - silver-vol:/opt/airflow/silver
       - gold-vol:/opt/airflow/gold
+      - ./keys:/opt/airflow/keys
 volumes:
   landed-vol:
   bronze-vol:
