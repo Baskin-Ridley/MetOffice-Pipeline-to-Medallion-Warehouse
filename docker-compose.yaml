@@ -18,6 +18,8 @@ services:
   airflow-common: &airflow-common
     build: .
     user: root 
+    env_file:
+      - .env
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
@@ -27,6 +29,9 @@ services:
       - GCP_PROJECT_ID=${GCP_PROJECT_ID}
       - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
       - PYTHONPATH=/opt/airflow
+      - AIRFLOW_VAR_PROJECT_ID=${AIRFLOW_VAR_PROJECT_ID}
+      - AIRFLOW_VAR_REGION=${AIRFLOW_VAR_REGION}
+      - AIRFLOW_VAR_DATA_LAKE_ROOT_PATH=${AIRFLOW_VAR_DATA_LAKE_ROOT_PATH}
     volumes:
       # local
       - ./dags:/opt/airflow/dags

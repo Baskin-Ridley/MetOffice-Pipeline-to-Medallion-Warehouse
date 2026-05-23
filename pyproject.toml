@@ -16,3 +16,10 @@ dependencies = [
     "universal-pathlib>=0.3.10",
     "gcsfs>=2026.5.0",
 ]
+
+[dependency-groups]
+dev = [
+    "apache-airflow>=3.2.1",
+    "apache-airflow-providers-cncf-kubernetes>=10.17.0",
+    "apache-airflow-providers-google>=21.3.0",
+]

@@ -45,7 +45,7 @@ def get_run_timestamp() -> str:
     return datetime.now().astimezone().strftime("%Y%m%d_%H%M%S%z")
 
 def save_metadata_to_landed(station_name: str, latitude: float, longitude: float, region: str, country_code: str, station_type: str, metadata: Dict, run_timestamp: str):
-    target_dir = os.path.join(LANDED_DIR, run_timestamp)
+    #target_dir = os.path.join(LANDED_DIR, run_timestamp)
     #os.makedirs(target_dir, exist_ok=True) removed to proof for GCS integration
     
     output_data = {
