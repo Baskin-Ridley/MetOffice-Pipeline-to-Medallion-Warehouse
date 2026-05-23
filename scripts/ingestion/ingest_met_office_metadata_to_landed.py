@@ -66,7 +66,7 @@ def save_metadata_to_landed(station_name: str, latitude: float, longitude: float
 
 def main():
     seeds_df = (
-        pl.read_csv(SEEDS_FILE)
+        pl.read_csv(str(SEEDS_FILE))
         .filter(pl.col("is_monitored") == 1)
         .with_columns(
             pl.col("location")

@@ -33,14 +33,14 @@ def fetch_met_office_data(geohash: str) -> dict:
 def main():
     # Load geohashes from Silver metadata table
     try:
-        geohashes = pl.read_delta(METADATA_DIR).get_column("station_geohash").unique().to_list()
+        geohashes = pl.read_delta(str(METADATA_DIR)).get_column("station_geohash").unique().to_list()
     except Exception as e:
         print(f"Failed to load silver metadata: {e}")
         return
 
     run_timestamp = datetime.now().astimezone().strftime("%Y%m%d_%H%M%S%z")
-    target_dir = os.path.join(LANDED_DIR, run_timestamp)
-    os.makedirs(target_dir, exist_ok=True)
+    target_dir = LANDED_DIR / run_timestamp
+    target_dir.mkdir(parents=True, exist_ok=True)
 
     all_data = []
 
@@ -57,8 +57,8 @@ def main():
             time.sleep(0.5) 
 
     if all_data:
-        file_path = os.path.join(target_dir, "observations_batch.json")
-        pl.DataFrame(all_data).write_json(file_path,)
+        file_path = target_dir / "observations_batch.json"
+        pl.DataFrame(all_data).write_json(str(file_path))
         print(f"Saved {len(all_data)} records to {file_path}")
 if __name__ == "__main__":
     main()

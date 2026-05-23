@@ -80,12 +80,12 @@ def main():
         .withColumn("_extraction_id", lit(extraction_id)) \
         .withColumn("_row_hash", sha2(concat_ws("||", *df_exploded.columns), 256))
 
-    #if os.path.exists(BRONZE_DIR) and len(os.listdir(BRONZE_DIR)) > 0: updating to proof for GCS integration
-    if BRONZE_DIR.exists() and any(BRONZE_DIR.iterdir()):
-        print("Checking for existing observations in Bronze...")
-        df_existing = spark.read.format("delta").load(str(BRONZE_DIR))
-        # Remove records that already exist for that station and time
-        df_bronze = df_bronze.join(df_existing, on=incremental_keys, how="left_anti")
+    if BRONZE_DIR.exists():
+        try:
+            df_existing = spark.read.format("delta").load(str(BRONZE_DIR))
+            df_bronze = df_bronze.join(df_existing, on=incremental_keys, how="left_anti")
+        except Exception:
+            pass
 
     new_records_count = df_bronze.count()
     if new_records_count > 0:

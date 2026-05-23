@@ -16,7 +16,13 @@ def get_latest_version_paths(base_dir: str, target_dir: str) -> Tuple[str, str, 
             f"Ensure your ingestion script has run successfully to create this path."
         )
 
-    folders = sorted([f for f in base_path.iterdir() if f.is_dir()])
+    try:
+        folders = sorted([f for f in base_path.iterdir() if f.is_dir()])
+    except Exception as e:
+        raise FileNotFoundError(
+            f"Unable to list directories under '{base_dir}'. "
+            f"Ensure the path is accessible and contains valid subfolders."
+        ) from e
     
     if not folders:
         raise FileNotFoundError(f"No subfolders found inside '{base_dir}'")
