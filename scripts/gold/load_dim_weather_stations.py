@@ -32,20 +32,36 @@ def main():
     )
 
     try:
-        spark.read.format("delta").load(str(GOLD_DIR))
-        
-        df_gold.createOrReplaceTempView("updates")
-        
-        spark.sql(f"""
-            MERGE INTO delta.`{GOLD_DIR}` AS target
-            USING updates
-            ON target.StationKey = updates.StationKey
-            WHEN MATCHED AND target.IsCurrent = true AND target.RowHash <> updates.RowHash THEN
-              UPDATE SET IsCurrent = false, EffEndDate = current_timestamp()
-        """)
-        
-        df_gold.write.format("delta").mode("append").save(str(GOLD_DIR))
-        
+        df_existing = spark.read.format("delta").load(str(GOLD_DIR))
+        current_existing = df_existing.filter(col("IsCurrent") == True).select("StationKey", "RowHash")
+
+        df_changed = (
+            df_gold.alias("updates")
+            .join(
+                current_existing.alias("current"),
+                on="StationKey",
+                how="left"
+            )
+            .filter(
+                (col("current.StationKey").isNull()) |
+                (col("updates.RowHash") != col("current.RowHash"))
+            )
+            .select("updates.*")
+        )
+
+        if df_changed.count() > 0:
+            df_changed.createOrReplaceTempView("updates")
+            spark.sql(f"""
+                MERGE INTO delta.`{GOLD_DIR}` AS target
+                USING updates
+                ON target.StationKey = updates.StationKey AND target.IsCurrent = true
+                WHEN MATCHED THEN
+                  UPDATE SET IsCurrent = false, EffEndDate = current_timestamp()
+            """)
+            df_changed.write.format("delta").mode("append").save(str(GOLD_DIR))
+        else:
+            print("No station metadata changes detected; skipping gold append.")
+
     except Exception:
         # Initial Load if table doesn't exist
         print("Table not found. Performing initial load...")
