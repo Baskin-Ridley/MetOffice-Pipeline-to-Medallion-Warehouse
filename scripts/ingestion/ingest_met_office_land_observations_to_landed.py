@@ -58,7 +58,9 @@ def main():
 
     if all_data:
         file_path = target_dir / "observations_batch.json"
-        pl.DataFrame(all_data).write_json(str(file_path))
+        file_path.parent.mkdir(parents=True, exist_ok=True)
+        with file_path.open("w") as f:
+            json.dump(all_data, f, indent=4)
         print(f"Saved {len(all_data)} records to {file_path}")
 if __name__ == "__main__":
     main()
