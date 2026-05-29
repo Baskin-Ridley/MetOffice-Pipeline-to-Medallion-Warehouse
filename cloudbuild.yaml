@@ -71,7 +71,7 @@ steps:
         echo "Importing Airflow variables into Composer"
         export DATA_LAKE_BUCKET 
         
-        python - <<'PY'
+        python3 - <<'PY'
         import json, os
         variables = {
           "project_id": os.environ["PROJECT_ID"],
@@ -82,8 +82,7 @@ steps:
             json.dump(variables, f, indent=2)
         PY
         
-        gcloud composer environments run "$$COMPOSER_ENV" --location "${_REGION}" variables import -- /workspace/airflow_variables.json
-timeout: '18000s'
+        gcloud composer environments run "$$COMPOSER_ENV" --location "${_REGION}" variables import -- /workspace/airflow_variables.jsontimeout: '18000s'
 options:
   logging: CLOUD_LOGGING_ONLY
 
