@@ -19,3 +19,8 @@ variable "environment" {
 #   description = "Pulled from the local environment via TF_VAR_db_password"
 #   sensitive   = true
 # }
+
+variable "project_number" {
+  type        = string
+  description = "The numeric ID of your GCP project, required for the Composer service account string."
+}

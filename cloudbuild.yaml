@@ -17,6 +17,7 @@ steps:
       - |
         terraform apply -auto-approve \
           -var="project_id=${PROJECT_ID}" \
+          -var="project_number=${PROJECT_NUMBER}" \
           -var="region=${_REGION}" \
           -var="environment=gcp"
 

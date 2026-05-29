@@ -11,8 +11,6 @@ terraform {
 provider "google" {
   project = var.project_id
   region  = var.region
-  # Credentials are intentionally omitted so Terraform can use
-  # Application Default Credentials in Cloud Build or local ADC.
 }
 
 locals {
@@ -26,7 +24,7 @@ resource "google_storage_bucket" "datalake" {
   count         = var.environment == "gcp" ? 1 : 0
   name          = "${var.project_id}-met-office-datalake"
   location      = var.region
-  force_destroy = true # Allows easy tear-down for portfolio resetting
+  force_destroy = true 
 
   uniform_bucket_level_access = true
 
@@ -35,7 +33,6 @@ resource "google_storage_bucket" "datalake" {
   }
 }
 
-# Generates your Medallion layer directory structure inside the bucket
 resource "google_storage_bucket_object" "lake_folders" {
   count   = var.environment == "gcp" ? length(local.layers) : 0
   name    = "${local.layers[count.index]}/"
@@ -51,8 +48,8 @@ resource "google_bigquery_dataset" "warehouse" {
   dataset_id                 = "noaa_medallion_warehouse"
   friendly_name              = "NOAA Medallion Data Warehouse"
   description                = "Houses the Bronze, Silver, and Gold analytical data layers"
-  location                   = "EU" # Keeps data residency consistent
-  delete_contents_on_destroy = true # Helpful for clean local portfolio teardowns
+  location                   = "EU" 
+  delete_contents_on_destroy = true 
 }
 
 #=========================================
@@ -64,9 +61,12 @@ resource "google_composer_environment" "composer" {
   region = var.region
 
   config {
-    # MINIMAL CHANGES MADE HERE:
-    # Swapped 'node_count = 3' for modern autoscaling sizing profiles
     environment_size = "ENVIRONMENT_SIZE_SMALL"
+
+    # MINIMAL CHANGE MADE HERE: Explicitly pass the project's default compute service account
+    node_config {
+      service_account = "${var.project_number}-compute@developer.gserviceaccount.com"
+    }
 
     software_config {
       pypi_packages = {
