@@ -1,5 +1,14 @@
 steps:
   - name: 'hashicorp/terraform:1.5.7'
+    id: 'terraform-init'
+    dir: 'terraform'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        terraform init
+
+  - name: 'hashicorp/terraform:1.5.7'
     id: 'terraform-import'
     dir: 'terraform'
     entrypoint: 'sh'
