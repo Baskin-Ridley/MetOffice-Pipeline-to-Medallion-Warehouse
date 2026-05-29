@@ -59,10 +59,10 @@ steps:
         COMPOSER_ENV=$(cat /workspace/composer_environment_name)
         DATA_LAKE_BUCKET=$(cat /workspace/data_lake_bucket_name)
         
-        COMPOSER_BUCKET=$(gcloud composer environments describe "$$COMPOSER_ENV" --location "${_REGION}" --format="value(config.gcsBucket)")
+        COMPOSER_DAG_PATH=$(gcloud composer environments describe "$$COMPOSER_ENV" --location "${_REGION}" --format="value(config.dagGcsPrefix)")
 
-        echo "Uploading DAGs to gs://$$COMPOSER_BUCKET/dags/"
-        gsutil -m cp -r dags/* gs://$$COMPOSER_BUCKET/dags/
+        echo "Uploading DAGs to $$COMPOSER_DAG_PATH/"
+        gsutil -m cp -r dags/* "$$COMPOSER_DAG_PATH/"
 
         echo "Uploading scripts to gs://$$DATA_LAKE_BUCKET/scripts/"
         gsutil -m cp -r scripts gs://$$DATA_LAKE_BUCKET/scripts/
@@ -83,7 +83,6 @@ steps:
         PY
         
         gcloud composer environments run "$$COMPOSER_ENV" --location "${_REGION}" variables import -- /workspace/airflow_variables.json
-
 timeout: '18000s'
 options:
   logging: CLOUD_LOGGING_ONLY
