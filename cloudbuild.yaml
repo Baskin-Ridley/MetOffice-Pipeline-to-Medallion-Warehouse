@@ -63,4 +63,7 @@ steps:
         PY
         gcloud composer environments run "${COMPOSER_ENV}" --location "${REGION}" variables import -- /workspace/airflow_variables.json
 
+# Global configurations go at the root level, out of the steps list
 timeout: '18000s'
+options:
+  logging: CLOUD_LOGGING_ONLY
