@@ -17,7 +17,7 @@ steps:
       - |
         terraform apply -auto-approve \
           -var="project_id=${PROJECT_ID}" \
-          -var="region=${_REGION}" \ # Updated to ${_REGION}
+          -var="region=${_REGION}" \
           -var="environment=gcp"
 
   - name: 'hashicorp/terraform:1.5.7'
@@ -41,29 +41,31 @@ steps:
 
         COMPOSER_ENV=$(cat /workspace/composer_environment_name)
         DATA_LAKE_BUCKET=$(cat /workspace/data_lake_bucket_name)
-        # Updated to ${_REGION} below
-        COMPOSER_BUCKET=$(gcloud composer environments describe "${COMPOSER_ENV}" --location "${_REGION}" --format="value(config.gcsBucket)")
+        
+        # Changed to $$COMPOSER_ENV and $$DATA_LAKE_BUCKET below so Cloud Build ignores them
+        COMPOSER_BUCKET=$(gcloud composer environments describe "$$COMPOSER_ENV" --location "${_REGION}" --format="value(config.gcsBucket)")
 
-        echo "Uploading DAGs to gs://${COMPOSER_BUCKET}/dags/"
-        gsutil -m cp -r dags/* gs://${COMPOSER_BUCKET}/dags/
+        echo "Uploading DAGs to gs://$$COMPOSER_BUCKET/dags/"
+        gsutil -m cp -r dags/* gs://$$COMPOSER_BUCKET/dags/
 
-        echo "Uploading scripts to gs://${DATA_LAKE_BUCKET}/scripts/"
-        gsutil -m cp -r scripts gs://${DATA_LAKE_BUCKET}/scripts/
-        gsutil -m cp -r common gs://${DATA_LAKE_BUCKET}/common/
+        echo "Uploading scripts to gs://$$DATA_LAKE_BUCKET/scripts/"
+        gsutil -m cp -r scripts gs://$$DATA_LAKE_BUCKET/scripts/
+        gsutil -m cp -r common gs://$$DATA_LAKE_BUCKET/common/
 
         echo "Importing Airflow variables into Composer"
         python - <<'PY'
         import json, os
         variables = {
           "project_id": os.environ["PROJECT_ID"],
-          "region": os.environ["_REGION"], # Updated to _REGION
+          "region": os.environ["_REGION"],
           "data_lake_root_path": f"gs://{os.environ['DATA_LAKE_BUCKET']}"
         }
         with open('/workspace/airflow_variables.json', 'w') as f:
             json.dump(variables, f, indent=2)
         PY
-        # Updated to ${_REGION} below
-        gcloud composer environments run "${COMPOSER_ENV}" --location "${_REGION}" variables import -- /workspace/airflow_variables.json
+        
+        # Changed to $$COMPOSER_ENV here too
+        gcloud composer environments run "$$COMPOSER_ENV" --location "${_REGION}" variables import -- /workspace/airflow_variables.json
 
 timeout: '18000s'
 options:
