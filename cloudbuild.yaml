@@ -20,7 +20,6 @@ steps:
         terraform import -input=false -var="project_id=${PROJECT_ID}" -var="project_number=${PROJECT_NUMBER}" -var="region=${_REGION}" -var="environment=gcp" 'google_bigquery_dataset.warehouse[0]' ${PROJECT_ID}/noaa_medallion_warehouse || true
         terraform import -input=false -var="project_id=${PROJECT_ID}" -var="project_number=${PROJECT_NUMBER}" -var="region=${_REGION}" -var="environment=gcp" 'google_composer_environment.composer[0]' projects/${PROJECT_ID}/locations/${_REGION}/environments/${PROJECT_ID}-composer || true
 
-
   - name: 'hashicorp/terraform:1.5.7'
     id: 'terraform-apply'
     dir: 'terraform'
@@ -82,10 +81,14 @@ steps:
             json.dump(variables, f, indent=2)
         PY
         
-        gcloud composer environments run "$$COMPOSER_ENV" --location "${_REGION}" variables import -- /workspace/airflow_variables.jsontimeout: '18000s'
+        COMPOSER_BUCKET=$(echo "$$COMPOSER_DAG_PATH" | sed 's/\/dags//')
+        gsutil cp /workspace/airflow_variables.json "$$COMPOSER_BUCKET/data/airflow_variables.json"
+
+        gcloud composer environments run "$$COMPOSER_ENV" --location "${_REGION}" variables import -- /home/airflow/gcs/data/airflow_variables.json
+
+timeout: '18000s'
 options:
   logging: CLOUD_LOGGING_ONLY
 
-# SET DEFAULT GLOBAL SUBSTITUTIONS HERE
 substitutions:
-  _REGION: 'europe-west2' # Defaults the pipeline to London
+  _REGION: 'europe-west2'
