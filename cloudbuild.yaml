@@ -33,6 +33,10 @@ steps:
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: 'deploy-to-composer'
     entrypoint: 'bash'
+    # FIX: Explicitly pass Cloud Build substitutions into the step's environment variables
+    env:
+      - '_REGION=${_REGION}'
+      - 'PROJECT_ID=${PROJECT_ID}'
     args:
       - '-c'
       - |
@@ -42,7 +46,6 @@ steps:
         COMPOSER_ENV=$(cat /workspace/composer_environment_name)
         DATA_LAKE_BUCKET=$(cat /workspace/data_lake_bucket_name)
         
-        # Changed to $$COMPOSER_ENV and $$DATA_LAKE_BUCKET below so Cloud Build ignores them
         COMPOSER_BUCKET=$(gcloud composer environments describe "$$COMPOSER_ENV" --location "${_REGION}" --format="value(config.gcsBucket)")
 
         echo "Uploading DAGs to gs://$$COMPOSER_BUCKET/dags/"
@@ -53,6 +56,9 @@ steps:
         gsutil -m cp -r common gs://$$DATA_LAKE_BUCKET/common/
 
         echo "Importing Airflow variables into Composer"
+        # Export the bash variable so Python's os.environ can see it
+        export DATA_LAKE_BUCKET 
+        
         python - <<'PY'
         import json, os
         variables = {
@@ -64,7 +70,6 @@ steps:
             json.dump(variables, f, indent=2)
         PY
         
-        # Changed to $$COMPOSER_ENV here too
         gcloud composer environments run "$$COMPOSER_ENV" --location "${_REGION}" variables import -- /workspace/airflow_variables.json
 
 timeout: '18000s'
