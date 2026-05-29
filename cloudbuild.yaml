@@ -9,6 +9,17 @@ steps:
         terraform init
 
   - name: 'hashicorp/terraform:1.5.7'
+    id: 'terraform-import'
+    dir: 'terraform'
+    entrypoint: 'sh'
+    args:
+      - '-c'
+      - |
+        terraform import -input=false -var="project_id=${PROJECT_ID}" -var="project_number=${PROJECT_NUMBER}" -var="region=${_REGION}" -var="environment=gcp" google_storage_bucket.datalake[0] ${PROJECT_ID}-met-office-datalake || true
+        terraform import -input=false -var="project_id=${PROJECT_ID}" -var="project_number=${PROJECT_NUMBER}" -var="region=${_REGION}" -var="environment=gcp" google_bigquery_dataset.warehouse[0] ${PROJECT_ID}:noaa_medallion_warehouse || true
+        terraform import -input=false -var="project_id=${PROJECT_ID}" -var="project_number=${PROJECT_NUMBER}" -var="region=${_REGION}" -var="environment=gcp" google_composer_environment.composer[0] projects/${PROJECT_ID}/locations/${_REGION}/environments/${PROJECT_ID}-composer || true
+
+  - name: 'hashicorp/terraform:1.5.7'
     id: 'terraform-apply'
     dir: 'terraform'
     entrypoint: 'sh'

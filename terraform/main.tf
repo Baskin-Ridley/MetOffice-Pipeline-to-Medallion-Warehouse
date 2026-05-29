@@ -63,16 +63,10 @@ resource "google_composer_environment" "composer" {
   config {
     environment_size = "ENVIRONMENT_SIZE_SMALL"
 
-    # MINIMAL CHANGE MADE HERE: Explicitly pass the project's default compute service account
     node_config {
       service_account = "${var.project_number}-compute@developer.gserviceaccount.com"
     }
 
-    software_config {
-      pypi_packages = {
-        "apache-airflow-providers-google" = ">=21.3.0"
-      }
-    }
   }
 }
 
