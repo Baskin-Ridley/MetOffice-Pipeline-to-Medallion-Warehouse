@@ -63,12 +63,11 @@ steps:
         echo "Uploading DAGs to $$COMPOSER_DAG_PATH/"
         gsutil -m cp -r dags/* "$$COMPOSER_DAG_PATH/"
 
-        echo "Uploading scripts to gs://$$DATA_LAKE_BUCKET/scripts/"
-        gsutil -m cp -r scripts gs://$$DATA_LAKE_BUCKET/scripts/
-        gsutil -m cp -r common gs://$$DATA_LAKE_BUCKET/common/
+        echo "Uploading scripts and common to Composer DAGs directory..."
+        gsutil -m cp -r scripts common "$$COMPOSER_DAG_PATH/"
 
-        echo "Uploading seeds to gs://$$DATA_LAKE_BUCKET/seeds/"
-        gsutil -m cp -r seeds gs://$$DATA_LAKE_BUCKET/seeds/
+        echo "Uploading seeds to data lake..."
+        gsutil -m cp -r seeds gs://$$DATA_LAKE_BUCKET/
 
         echo "Importing Airflow variables into Composer"
         export DATA_LAKE_BUCKET 
