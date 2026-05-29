@@ -33,7 +33,6 @@ steps:
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     id: 'deploy-to-composer'
     entrypoint: 'bash'
-    # FIX: Explicitly pass Cloud Build substitutions into the step's environment variables
     env:
       - '_REGION=${_REGION}'
       - 'PROJECT_ID=${PROJECT_ID}'
@@ -56,7 +55,6 @@ steps:
         gsutil -m cp -r common gs://$$DATA_LAKE_BUCKET/common/
 
         echo "Importing Airflow variables into Composer"
-        # Export the bash variable so Python's os.environ can see it
         export DATA_LAKE_BUCKET 
         
         python - <<'PY'
@@ -75,3 +73,7 @@ steps:
 timeout: '18000s'
 options:
   logging: CLOUD_LOGGING_ONLY
+
+# SET DEFAULT GLOBAL SUBSTITUTIONS HERE
+substitutions:
+  _REGION: 'europe-west2' # Defaults the pipeline to London
