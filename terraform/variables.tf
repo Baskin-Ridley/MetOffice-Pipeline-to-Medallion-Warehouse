@@ -4,8 +4,8 @@ variable "project_id" {
 }
 
 variable "region" {
-  type        = string
-  default     = "europe-west2"
+  type    = string
+  default = "europe-west2"
 }
 
 variable "environment" {
@@ -13,3 +13,9 @@ variable "environment" {
   description = "Toggle between 'local' and 'gcp'"
   default     = "local"
 }
+
+# variable "db_password" {
+#   type        = string
+#   description = "Pulled from the local environment via TF_VAR_db_password"
+#   sensitive   = true
+# }

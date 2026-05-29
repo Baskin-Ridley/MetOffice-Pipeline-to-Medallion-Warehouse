@@ -9,8 +9,8 @@ terraform {
 }
 
 provider "google" {
-  project = var.project_id
-  region  = var.region
+  project     = var.project_id
+  region      = var.region
   credentials = var.gcp_credentials_json
 }
 
@@ -20,17 +20,18 @@ variable "gcp_credentials_json" {
   sensitive   = true 
 }
 
-# Plural 'locals' block is used only for declaring variables
 locals {
-  layers = ["landed", "bronze", "silver", "gold"]
+  layers = ["seeds", "landed", "bronze", "silver", "gold"]
 }
 
-# Dynamic GCS Bucket: Only spins up if environment is set to 'gcp'
+#=========================================
+# 1. STORAGE (DATA LAKE)
+#=========================================
 resource "google_storage_bucket" "datalake" {
   count         = var.environment == "gcp" ? 1 : 0
   name          = "${var.project_id}-met-office-datalake"
   location      = var.region
-  force_destroy = false
+  force_destroy = true # Allows easy tear-down for portfolio resetting
 
   uniform_bucket_level_access = true
 
@@ -39,16 +40,35 @@ resource "google_storage_bucket" "datalake" {
   }
 }
 
+# Generates your Medallion layer directory structure inside the bucket
 resource "google_storage_bucket_object" "lake_folders" {
-  # FIX 1: Changed 'locals.layers' to 'local.layers' (singular) for references
   count   = var.environment == "gcp" ? length(local.layers) : 0
   name    = "${local.layers[count.index]}/"
   content = "Placeholder"
   bucket  = google_storage_bucket.datalake[0].name
 }
 
-output "data_lake_root_path" {
-  # FIX 2: Safeguarded against index [0] errors when count is 0 in local environment
-  value       = var.environment == "gcp" ? "gs://${one(google_storage_bucket.datalake[*].name)}" : "/opt/airflow"
-  description = "Expose this value to your Python scripts as DATALAKE_ROOT"
+#=========================================
+# 2. BIGQUERY (DATA WAREHOUSE / TOKENS)
+#=========================================
+resource "google_bigquery_dataset" "warehouse" {
+  count                       = var.environment == "gcp" ? 1 : 0
+  dataset_id                  = "noaa_medallion_warehouse"
+  friendly_name               = "NOAA Medallion Data Warehouse"
+  description                 = "Houses the Bronze, Silver, and Gold analytical data layers"
+  location                    = "EU" # Keeps data residency consistent
+  delete_contents_on_destroy = true # Helpful for clean local portfolio teardowns
+}
+
+#=========================================
+# OUTPUTS
+#=========================================
+output "data_lake_bucket_name" {
+  value       = var.environment == "gcp" ? google_storage_bucket.datalake[0].name : "local_fallback"
+  description = "The target bucket name for your ingestion scripts"
+}
+
+output "bigquery_dataset_id" {
+  value       = var.environment == "gcp" ? google_bigquery_dataset.warehouse[0].dataset_id : "local_fallback"
+  description = "The target dataset where your analytical layers reside"
 }
