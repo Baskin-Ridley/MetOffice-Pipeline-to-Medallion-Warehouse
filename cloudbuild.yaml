@@ -1,12 +1,13 @@
 steps:
   - name: 'hashicorp/terraform:1.5.7'
-    id: 'terraform-init'
+    id: 'terraform-import'
     dir: 'terraform'
     entrypoint: 'sh'
     args:
       - '-c'
       - |
-        terraform init
+        terraform import google_storage_bucket.datalake[0] ${PROJECT_ID}-met-office-datalake || true
+        terraform import google_bigquery_dataset.warehouse[0] ${PROJECT_ID}:noaa_medallion_warehouse || true
 
   - name: 'hashicorp/terraform:1.5.7'
     id: 'terraform-apply'
