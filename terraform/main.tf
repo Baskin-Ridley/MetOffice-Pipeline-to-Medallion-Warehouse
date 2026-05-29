@@ -64,7 +64,9 @@ resource "google_composer_environment" "composer" {
   region = var.region
 
   config {
-    node_count = 3
+    # MINIMAL CHANGES MADE HERE:
+    # Swapped 'node_count = 3' for modern autoscaling sizing profiles
+    environment_size = "ENVIRONMENT_SIZE_SMALL"
 
     software_config {
       pypi_packages = {
@@ -91,4 +93,3 @@ output "composer_environment_name" {
   value       = var.environment == "gcp" ? google_composer_environment.composer[0].name : "local_fallback"
   description = "The Cloud Composer environment name for DAG deployment"
 }
-
