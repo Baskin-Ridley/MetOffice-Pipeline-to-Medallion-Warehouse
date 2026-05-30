@@ -76,7 +76,7 @@ resource "google_composer_environment" "composer" {
         pyspark               = "==3.5.3"
         delta-spark           = "==3.2.0"
         deltalake             = "==1.5.1"
-        universal-pathlib     = "==0.3.10"
+        universal-pathlib = ">=0.3.0,<0.4.0"
         gcsfs                 = "==2026.5.0"
       }
     }
