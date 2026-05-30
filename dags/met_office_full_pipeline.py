@@ -29,6 +29,7 @@ with DAG(
     schedule_interval="@daily",
     start_date=datetime(2026, 6, 1),
     catchup=False,
+    is_paused_upon_creation=False,
     tags=["met-office", "full-pipeline"],
 ) as dag:
 
