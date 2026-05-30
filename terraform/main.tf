@@ -78,7 +78,11 @@ resource "google_composer_environment" "composer" {
 
       env_variables = {
         AIRFLOW_VAR_DATALAKE_BUCKET = google_storage_bucket.datalake[0].name
-        AIRFLOW__SECRETS__BACKEND   = "airflow.providers.google.cloud.secrets.secret_manager.CloudSecretManagerBackend"
+      }
+
+      airflow_config_overrides = {
+        "secrets-backend" = "airflow.providers.google.cloud.secrets.secret_manager.CloudSecretManagerBackend"
+        
       }
       # -----------------------------
     }
