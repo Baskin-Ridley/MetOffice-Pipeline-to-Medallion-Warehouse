@@ -15,6 +15,13 @@ provider "google" {
 
 locals {
   layers = ["seeds", "landed", "bronze", "silver", "gold"]
+
+  composer_pypi_packages = {
+    for line in split("\n", trimspace(file("${path.module}/../requirements.txt"))):
+    length(split("==", trimspace(line))) == 2 ? split("==", trimspace(line))[0] : trimspace(line) =>
+      length(split("==", trimspace(line))) == 2 ? split("==", trimspace(line))[1] : null
+    if length(trimspace(line)) > 0 && !starts_with(trimspace(line), "#")
+  }
 }
 
 #=========================================
@@ -67,6 +74,9 @@ resource "google_composer_environment" "composer" {
       service_account = "${var.project_number}-compute@developer.gserviceaccount.com"
     }
 
+    software_config {
+      pypi_packages = local.composer_pypi_packages
+    }
   }
 }
 
