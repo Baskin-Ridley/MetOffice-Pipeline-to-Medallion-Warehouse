@@ -20,7 +20,7 @@ locals {
     for line in split("\n", trimspace(file("${path.module}/../requirements.txt"))):
     length(split("==", trimspace(line))) == 2 ? split("==", trimspace(line))[0] : trimspace(line) =>
       length(split("==", trimspace(line))) == 2 ? split("==", trimspace(line))[1] : null
-    if length(trimspace(line)) > 0 && !starts_with(trimspace(line), "#")
+    if length(trimspace(line)) > 0 && length(regexall("^#", trimspace(line))) == 0
   }
 }
 
