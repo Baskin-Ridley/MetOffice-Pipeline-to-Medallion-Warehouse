@@ -20,7 +20,7 @@ with DAG(
     default_args=DEFAULT_ARGS,
     description="Daily Silver layer processing for Met Office bronze data",
     schedule_interval="@daily",
-    start_date=datetime(2026, 6, 1),
+    start_date=datetime(2026, 5, 23),
     catchup=False,
     tags=["met-office", "silver"],
 ) as dag:

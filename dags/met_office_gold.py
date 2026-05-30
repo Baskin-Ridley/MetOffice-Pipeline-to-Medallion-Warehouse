@@ -21,7 +21,7 @@ with DAG(
     default_args=DEFAULT_ARGS,
     description="Daily Gold layer processing for Met Office Silver data",
     schedule_interval="@daily",
-    start_date=datetime(2026, 6, 1),
+    start_date=datetime(2026, 5, 23),
     catchup=False,
     tags=["met-office", "gold"],
 ) as dag:

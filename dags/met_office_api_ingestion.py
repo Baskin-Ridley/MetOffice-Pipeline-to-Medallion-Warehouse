@@ -19,7 +19,7 @@ with DAG(
     default_args=DEFAULT_ARGS,
     description="Daily Met Office API ingestion to the landed data layer",
     schedule_interval="@daily",
-    start_date=datetime(2026, 6, 1),
+    start_date=datetime(2026, 5, 23),
     catchup=False,
     tags=["met-office", "ingestion"],
 ) as dag:
