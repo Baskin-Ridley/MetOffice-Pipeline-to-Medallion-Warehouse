@@ -1,12 +1,13 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_utc_timestamp, date_format, current_timestamp, input_file_name, regexp_replace, regexp_extract, lit, sha2, concat_ws
 import uuid
-from upath import UPath as Path
+from upath import UPath
 from common.file_utils import get_latest_version_paths
 import os
 
 # Base directory
-DATALAKE_ROOT = Path(os.getenv("DATALAKE_ROOT", "/opt/airflow"))
+BUCKET_NAME = os.getenv("DATALAKE_BUCKET", "your-gcp-datalake-bucket")
+DATALAKE_ROOT = UPath(f"gs://{BUCKET_NAME}")
 
 BRONZE_DIR = DATALAKE_ROOT / "bronze/met_office/station_metadata"
 LANDED_BASE_DIR = DATALAKE_ROOT / "landed/met_office/station_metadata"

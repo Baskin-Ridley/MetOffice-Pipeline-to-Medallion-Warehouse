@@ -7,12 +7,13 @@ from google.cloud import storage
 from dotenv import load_dotenv
 from deltalake import DeltaTable
 import polars as pl
-from upath import UPath as Path
+from upath import UPath
 
 
 # configure
 load_dotenv()
-DATALAKE_ROOT = Path(os.getenv("DATALAKE_ROOT", "/opt/airflow"))
+BUCKET_NAME = os.getenv("DATALAKE_BUCKET", "your-gcp-datalake-bucket")
+DATALAKE_ROOT = UPath(f"gs://{BUCKET_NAME}")
 LANDED_DIR = DATALAKE_ROOT / "landed/met_office/station_observation_land"
 METADATA_DIR = DATALAKE_ROOT / "silver/met_office/station_metadata"
 #API_KEY = open(os.getenv("MET_OFFICE_API_KEY_PATH")).read().strip()

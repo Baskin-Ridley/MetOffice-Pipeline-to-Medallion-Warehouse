@@ -2,11 +2,12 @@ import os
 
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import expr, trim, col, upper, current_timestamp, lit, sha2, concat_ws, when, date_format 
-from upath import UPath as Path
+from upath import UPath
 from common.file_utils import start_spark_session
 
 # Base directories
-DATALAKE_ROOT = Path(os.getenv("DATALAKE_ROOT", "/opt/airflow"))
+BUCKET_NAME = os.getenv("DATALAKE_BUCKET", "your-gcp-datalake-bucket")
+DATALAKE_ROOT = UPath(f"gs://{BUCKET_NAME}")
 STATION_OBSERVATIONS_LAND_SILVER_DIR = DATALAKE_ROOT / "silver/met_office/station_observation_land"
 GOLD_DIR = DATALAKE_ROOT / "gold/weather/weather_metrics"
 

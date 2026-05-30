@@ -5,13 +5,14 @@ import os
 from typing import Dict, Optional
 import json
 from datetime import datetime
-from upath import UPath as Path
+from upath import UPath
 from dotenv import load_dotenv
 
 # configure
 load_dotenv()
 
-DATALAKE_ROOT = Path(os.getenv("DATALAKE_ROOT", "/opt/airflow"))
+BUCKET_NAME = os.getenv("DATALAKE_BUCKET", "your-gcp-datalake-bucket")
+DATALAKE_ROOT = UPath(f"gs://{BUCKET_NAME}")
 SEEDS_FILE = DATALAKE_ROOT / "seeds/met_office_weather_stations_seed.csv"
 LANDED_DIR = DATALAKE_ROOT / "landed/met_office/station_metadata"
 #API_KEY = open(os.getenv("MET_OFFICE_API_KEY_PATH")).read().strip()

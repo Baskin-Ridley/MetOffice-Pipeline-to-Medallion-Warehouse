@@ -5,10 +5,11 @@ from pyspark.sql.functions import (
     explode, sequence, to_date, col, date_format, 
     year, month, dayofmonth, quarter, when, lit
 )
-from upath import UPath as Path
+from upath import UPath
 from common.file_utils import start_spark_session
 
-DATALAKE_ROOT = Path(os.getenv("DATALAKE_ROOT", "/opt/airflow"))
+BUCKET_NAME = os.getenv("DATALAKE_BUCKET", "your-gcp-datalake-bucket")
+DATALAKE_ROOT = UPath(f"gs://{BUCKET_NAME}")
 GOLD_DIM_DIR = DATALAKE_ROOT / "gold/master/dim_date"
 
 def generate_dim_date(spark, start_date="2020-01-01", end_date="2031-12-31"):
