@@ -75,6 +75,11 @@ resource "google_composer_environment" "composer" {
         delta-spark       = "==3.2.0"
         deltalake         = "==1.5.1"
       }
+
+      env_variables = {
+        AIRFLOW_VAR_DATALAKE_BUCKET = google_storage_bucket.datalake[0].name
+      }
+      # -----------------------------
     }
   }
 }
