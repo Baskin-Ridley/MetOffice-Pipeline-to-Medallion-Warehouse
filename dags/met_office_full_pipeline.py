@@ -27,7 +27,7 @@ with DAG(
     default_args=DEFAULT_ARGS,
     description="End-to-end Met Office medallion pipeline including ingestion and all transformation layers",
     schedule_interval="@daily",
-    start_date=datetime(2026, 6, 1),
+    start_date=datetime(2026, 5, 23),
     catchup=False,
     is_paused_upon_creation=False,
     tags=["met-office", "full-pipeline"],
