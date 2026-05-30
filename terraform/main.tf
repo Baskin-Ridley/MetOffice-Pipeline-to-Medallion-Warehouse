@@ -69,15 +69,15 @@ resource "google_composer_environment" "composer" {
 
     software_config {
       pypi_packages = {
-        google-cloud-bigquery = "3.41.0"
-        google-cloud-storage  = "3.10.1"
-        polars                = "1.40.1"
-        requests              = "2.33.1"
-        pyspark               = "3.5.3"
-        delta-spark           = "3.2.0"
-        deltalake             = "1.5.1"
-        universal-pathlib     = "0.3.10"
-        gcsfs                 = "2026.5.0"
+        google-cloud-bigquery = "==3.41.0"
+        google-cloud-storage  = "==3.10.1"
+        polars                = "==1.40.1"
+        requests              = "==2.33.1"
+        pyspark               = "==3.5.3"
+        delta-spark           = "==3.2.0"
+        deltalake             = "==1.5.1"
+        universal-pathlib     = "==0.3.10"
+        gcsfs                 = "==2026.5.0"
       }
     }
   }
