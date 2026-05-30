@@ -92,7 +92,7 @@ def main():
     )
 
     run_timestamp = get_run_timestamp()
-    for row in seeds_df.head(3).iter_rows(named=True):
+    for row in seeds_df.iter_rows(named=True):
         station_name = row["station_name"]
         latitude = row["latitude"]
         longitude = row["longitude"]

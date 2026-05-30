@@ -18,11 +18,13 @@ LANDED_DIR = DATALAKE_ROOT / "landed/met_office/station_observation_land"
 METADATA_DIR = DATALAKE_ROOT / "silver/met_office/station_metadata"
 #API_KEY = open(os.getenv("MET_OFFICE_API_KEY_PATH")).read().strip()
 #API_KEY = os.getenv("MET_OFFICE_API_KEY")
-API_KEY = Variable.get("MET_OFFICE_API_KEY")
-HEADERS = {"apikey": API_KEY} # met office expects key to be in header
+
 BASE_URL = "https://data.hub.api.metoffice.gov.uk/observation-land/1/"
 
 def fetch_met_office_data(geohash: str) -> dict:
+    API_KEY = Variable.get("MET_OFFICE_API_KEY")
+    HEADERS = {"apikey": API_KEY} # met office expects key to be in header
+    
     url = f"{BASE_URL}{geohash}"
     try:
         response = requests.get(url, headers=HEADERS)
