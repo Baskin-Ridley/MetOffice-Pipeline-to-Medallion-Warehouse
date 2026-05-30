@@ -82,11 +82,20 @@ resource "google_composer_environment" "composer" {
 
       airflow_config_overrides = {
         "secrets-backend" = "airflow.providers.google.cloud.secrets.secret_manager.CloudSecretManagerBackend"
-        
       }
-      # -----------------------------
     }
   }
+}
+
+#=========================================
+# 4. IAM PERMISSIONS FOR SECRET MANAGER
+#=========================================
+resource "google_secret_manager_secret_iam_member" "composer_secret_accessor" {
+  count     = var.environment == "gcp" ? 1 : 0
+  project   = var.project_id
+  secret_id = "airflow-variables-MET_OFFICE_API_KEY"
+  role      = "roles/secretmanager.secretAccessor"
+  member    = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
 }
 
 #=========================================

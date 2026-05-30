@@ -19,12 +19,14 @@ LANDED_DIR = DATALAKE_ROOT / "landed/met_office/station_metadata"
 #API_KEY = open(os.getenv("MET_OFFICE_API_KEY_PATH")).read().strip()
 
 #API_KEY = os.getenv("MET_OFFICE_API_KEY")
-API_KEY = Variable.get("MET_OFFICE_API_KEY")
-print(f"Loaded API Key: {API_KEY[:5]}...")
-HEADERS = {"apikey": API_KEY} 
+
 BASE_URL = "https://data.hub.api.metoffice.gov.uk/observation-land/1/nearest"
 
 def fetch_met_office_metadata (lat: float, lon: float) -> Optional[Dict]:
+    API_KEY = Variable.get("MET_OFFICE_API_KEY")
+    print(f"Loaded API Key: {API_KEY[:5]}...")
+    HEADERS = {"apikey": API_KEY} 
+    
     params = {
         "lat": round(lat, 2),
         "lon": round(lon, 2)
