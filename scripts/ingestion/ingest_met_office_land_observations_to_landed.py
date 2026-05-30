@@ -8,11 +8,11 @@ from dotenv import load_dotenv
 from deltalake import DeltaTable
 import polars as pl
 from upath import UPath
-
+from airflow.models import Variable
 
 # configure
 load_dotenv()
-BUCKET_NAME = os.getenv("DATALAKE_BUCKET", "your-gcp-datalake-bucket")
+BUCKET_NAME = Variable.get("datalake_bucket", "your-gcp-datalake-bucket")
 DATALAKE_ROOT = UPath(f"gs://{BUCKET_NAME}")
 LANDED_DIR = DATALAKE_ROOT / "landed/met_office/station_observation_land"
 METADATA_DIR = DATALAKE_ROOT / "silver/met_office/station_metadata"

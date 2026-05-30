@@ -4,9 +4,10 @@ import uuid
 from upath import UPath
 from common.file_utils import get_latest_version_paths
 import os
+from airflow.models import Variable
 
 # Base directory
-BUCKET_NAME = os.getenv("DATALAKE_BUCKET", "your-gcp-datalake-bucket")
+BUCKET_NAME = Variable.get("datalake_bucket", "your-gcp-datalake-bucket")
 DATALAKE_ROOT = UPath(f"gs://{BUCKET_NAME}")
 
 BRONZE_DIR = DATALAKE_ROOT / "bronze/met_office/station_metadata"

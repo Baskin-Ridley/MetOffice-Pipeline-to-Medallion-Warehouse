@@ -7,8 +7,9 @@ from pyspark.sql.functions import (
 )
 from upath import UPath
 from common.file_utils import start_spark_session
+from airflow.models import Variable
 
-BUCKET_NAME = os.getenv("DATALAKE_BUCKET", "your-gcp-datalake-bucket")
+BUCKET_NAME = Variable.get("datalake_bucket", "your-gcp-datalake-bucket")
 DATALAKE_ROOT = UPath(f"gs://{BUCKET_NAME}")
 GOLD_DIM_DIR = DATALAKE_ROOT / "gold/master/dim_date"
 

@@ -7,11 +7,12 @@ import json
 from datetime import datetime
 from upath import UPath
 from dotenv import load_dotenv
+from airflow.models import Variable
 
 # configure
 load_dotenv()
 
-BUCKET_NAME = os.getenv("DATALAKE_BUCKET", "your-gcp-datalake-bucket")
+BUCKET_NAME = Variable.get("datalake_bucket", "your-gcp-datalake-bucket")
 DATALAKE_ROOT = UPath(f"gs://{BUCKET_NAME}")
 SEEDS_FILE = DATALAKE_ROOT / "seeds/met_office_weather_stations_seed.csv"
 LANDED_DIR = DATALAKE_ROOT / "landed/met_office/station_metadata"
