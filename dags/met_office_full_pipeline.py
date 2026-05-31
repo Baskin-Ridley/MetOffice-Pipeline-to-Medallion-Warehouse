@@ -61,6 +61,11 @@ with DAG(
                 "main_python_file_uri": f"{GCS_DAGS_PATH}/scripts/bronze/load_met_office_metadata_to_bronze.py",
                 "python_file_uris": [f"{GCS_DAGS_PATH}/common/file_utils.py"],
                 "args": [DATALAKE_BUCKET],
+            },
+            "runtime_config": {
+                "properties": {
+                    "spark.jars.packages": "io.delta:delta-spark_2.12:3.1.0"
+                }
             }
         },
     )

@@ -3,12 +3,14 @@ from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.configuration import conf
+from airflow.models import Variable
 from airflow.operators.python import BranchPythonOperator
 from airflow.providers.google.cloud.operators.dataproc import DataprocCreateBatchOperator
 from airflow.utils.trigger_rule import TriggerRule
 
 GCS_BUCKET = os.environ.get("GCS_BUCKET")
 DAGS_GCS_PATH = f"gs://{GCS_BUCKET}/dags"
+DATALAKE_BUCKET = Variable.get("datalake_bucket")
 
 DEFAULT_ARGS = {
     "owner": "airflow",
@@ -50,13 +52,14 @@ with DAG(
         batch={
             "pyspark_batch": {
                 "main_python_file_uri": f"{DAGS_GCS_PATH}/scripts/bronze/load_met_office_metadata_to_bronze.py",
-                "python_file_uris": [f"{DAGS_GCS_PATH}/scripts/common/file_utils.py"],
+                "python_file_uris": [f"{DAGS_GCS_PATH}/common/file_utils.py"],
+                "args": [DATALAKE_BUCKET],
             },
             "runtime_config": {
-            "properties": {
-                "spark.jars.packages": "io.delta:delta-spark_2.12:3.1.0"
+                "properties": {
+                    "spark.jars.packages": "io.delta:delta-spark_2.12:3.1.0"
+                }
             }
-        }
         },
     )
 
@@ -69,10 +72,10 @@ with DAG(
                 "python_file_uris": [f"{DAGS_GCS_PATH}/common/file_utils.py"],
             },
             "runtime_config": {
-            "properties": {
-                "spark.jars.packages": "io.delta:delta-spark_2.12:3.1.0"
+                "properties": {
+                    "spark.jars.packages": "io.delta:delta-spark_2.12:3.1.0"
+                }
             }
-        }
         },
         trigger_rule=TriggerRule.NONE_FAILED_MIN_ONE_SUCCESS,
     )
