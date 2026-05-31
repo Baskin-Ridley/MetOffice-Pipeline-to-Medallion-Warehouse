@@ -2,16 +2,20 @@ from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from airflow.providers.google.cloud.operators.dataproc import DataprocCreateBatchOperator
+from airflow.models import Variable
 
 from scripts.ingestion.ingest_met_office_metadata_to_landed import main as ingest_metadata_main
 from scripts.ingestion.ingest_met_office_land_observations_to_landed import main as ingest_observations_main
-from scripts.bronze.load_met_office_metadata_to_bronze import main as load_metadata_bronze_main
-from scripts.bronze.load_met_office_land_observations_to_bronze import main as load_observations_bronze_main
 from scripts.silver.load_met_office_metadata_to_silver import main as load_metadata_silver_main
 from scripts.silver.load_met_office_land_observations_to_silver import main as load_observations_silver_main
 from scripts.gold.load_dim_date import main as load_dim_date_main
 from scripts.gold.load_dim_weather_stations import main as load_dim_weather_stations_main
 from scripts.gold.load_fact_weather_metrics import main as load_fact_weather_metrics_main
+
+PROJECT_ID = "noaa-medallion-warehouse"
+REGION = "europe-west2"
+BUCKET_NAME = Variable.get("datalake_bucket", "your-gcp-datalake-bucket")
 
 DEFAULT_ARGS = {
     "owner": "airflow",
@@ -38,9 +42,17 @@ with DAG(
         python_callable=ingest_metadata_main,
     )
 
-    metadata_bronze = PythonOperator(
+    metadata_bronze = DataprocCreateBatchOperator(
         task_id="load_met_office_metadata_to_bronze",
-        python_callable=load_metadata_bronze_main,
+        project_id=PROJECT_ID,
+        region=REGION,
+        batch_id="met-office-metadata-{{ ds_nodash }}-{{ task_instance.try_number }}",
+        batch={
+            "pyspark_batch": {
+                "main_python_file_uri": f"gs://{BUCKET_NAME}/dags/scripts/bronze/load_met_office_metadata_to_bronze.py",
+                "python_file_uris": [f"gs://{BUCKET_NAME}/dags/scripts/common/file_utils.py"]
+            }
+        }
     )
 
     metadata_silver = PythonOperator(
@@ -53,9 +65,17 @@ with DAG(
         python_callable=ingest_observations_main,
     )
 
-    observations_bronze = PythonOperator(
+    observations_bronze = DataprocCreateBatchOperator(
         task_id="load_met_office_land_observations_to_bronze",
-        python_callable=load_observations_bronze_main,
+        project_id=PROJECT_ID,
+        region=REGION,
+        batch_id="met-office-obs-{{ ds_nodash }}-{{ task_instance.try_number }}",
+        batch={
+            "pyspark_batch": {
+                "main_python_file_uri": f"gs://{BUCKET_NAME}/dags/scripts/bronze/load_met_office_land_observations_to_bronze.py",
+                "python_file_uris": [f"gs://{BUCKET_NAME}/dags/scripts/common/file_utils.py"]
+            }
+        }
     )
 
     observations_silver = PythonOperator(
