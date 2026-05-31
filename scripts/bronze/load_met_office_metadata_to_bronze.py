@@ -16,7 +16,6 @@ LANDED_BASE_DIR = DATALAKE_ROOT / "landed/met_office/station_metadata"
 def main():
     print("connecting to spark...")
     spark = SparkSession.builder \
-        .remote("sc://spark:15002") \
         .appName("MetOffice Metadata landed to bronze") \
         .getOrCreate()
 
