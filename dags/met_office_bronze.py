@@ -7,6 +7,7 @@ from airflow.providers.google.cloud.operators.dataproc import DataprocCreateBatc
 from airflow.utils.trigger_rule import TriggerRule
 
 DAGS_GCS_PATH = conf.get("core", "dags_folder").rstrip("/")
+print(f"--- DEBUG: DAGS_GCS_PATH is {DAGS_GCS_PATH} ---")
 
 DEFAULT_ARGS = {
     "owner": "airflow",
