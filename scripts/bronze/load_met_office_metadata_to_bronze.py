@@ -1,28 +1,46 @@
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import from_utc_timestamp, date_format, current_timestamp, input_file_name, regexp_replace, regexp_extract, lit, sha2, concat_ws
+import sys
 import uuid
-from upath import UPath
+from urllib.parse import urlparse
+from google.cloud import storage
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import (
+    from_utc_timestamp, date_format, current_timestamp, 
+    input_file_name, regexp_replace, regexp_extract, lit, sha2, concat_ws
+)
 from file_utils import get_latest_version_paths
-import os
-from airflow.models import Variable
 
-# Base directory
-BUCKET_NAME = Variable.get("datalake_bucket", "your-gcp-datalake-bucket")
-DATALAKE_ROOT = UPath(f"gs://{BUCKET_NAME}")
-
-BRONZE_DIR = DATALAKE_ROOT / "bronze/met_office/station_metadata"
-LANDED_BASE_DIR = DATALAKE_ROOT / "landed/met_office/station_metadata"
+def gcs_prefix_exists(gcs_uri: str) -> bool:
+    parsed = urlparse(gcs_uri)
+    bucket_name = parsed.netloc
+    prefix = parsed.path.lstrip("/")
+    
+    if prefix and not prefix.endswith("/"):
+        prefix += "/"
+        
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blobs = list(bucket.list_blobs(prefix=prefix, max_results=1))
+    return len(blobs) > 0
 
 def main():
+    if len(sys.argv) < 2:
+        raise ValueError("Missing required datalake bucket argument.")
+    
+    BUCKET_NAME = sys.argv[1]
+    DATALAKE_ROOT = f"gs://{BUCKET_NAME}"
+
+    BRONZE_DIR = f"{DATALAKE_ROOT}/bronze/met_office/station_metadata"
+    LANDED_BASE_DIR = f"{DATALAKE_ROOT}/landed/met_office/station_metadata"
+
     print("connecting to spark...")
     spark = SparkSession.builder \
         .appName("MetOffice Metadata landed to bronze") \
         .getOrCreate()
 
     landed_pattern, version_id, output_path = get_latest_version_paths(
-            LANDED_BASE_DIR, 
-            BRONZE_DIR
-        )
+        LANDED_BASE_DIR, 
+        BRONZE_DIR
+    )
 
     df = ( 
         spark.read
@@ -45,9 +63,9 @@ def main():
         .withColumn("_extraction_id", lit(extraction_id)) \
         .withColumn("_row_hash", sha2(concat_ws("||", *df.columns), 256))
 
-    if BRONZE_DIR.exists():
+    if gcs_prefix_exists(BRONZE_DIR):
         try:
-            df_existing = spark.read.format("delta").load(str(BRONZE_DIR))
+            df_existing = spark.read.format("delta").load(BRONZE_DIR)
             df_bronze = df_bronze.join(df_existing, on=business_keys, how="left_anti")
         except Exception:
             pass
@@ -60,7 +78,7 @@ def main():
         df_bronze.write.format("delta") \
          .mode("append") \
          .option("mergeSchema", "true") \
-         .save(str(BRONZE_DIR))
+         .save(BRONZE_DIR)
         print(f"Moved to bronze. Version {version_id} created.")
     else:
         print("No new data combinations found. Skipping write.")
