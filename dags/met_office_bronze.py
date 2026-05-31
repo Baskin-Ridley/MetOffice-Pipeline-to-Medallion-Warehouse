@@ -1,3 +1,4 @@
+import os
 from datetime import datetime, timedelta
 
 from airflow import DAG
@@ -6,8 +7,8 @@ from airflow.operators.python import BranchPythonOperator
 from airflow.providers.google.cloud.operators.dataproc import DataprocCreateBatchOperator
 from airflow.utils.trigger_rule import TriggerRule
 
-DAGS_GCS_PATH = conf.get("core", "dags_folder").rstrip("/")
-print(f"--- DEBUG: DAGS_GCS_PATH is {DAGS_GCS_PATH} ---")
+GCS_BUCKET = os.environ.get("GCS_BUCKET")
+DAGS_GCS_PATH = f"gs://{GCS_BUCKET}/dags"
 
 DEFAULT_ARGS = {
     "owner": "airflow",

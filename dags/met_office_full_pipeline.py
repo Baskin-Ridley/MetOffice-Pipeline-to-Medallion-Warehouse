@@ -8,12 +8,8 @@ from airflow.operators.python import PythonOperator
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from airflow.providers.google.cloud.operators.dataproc import DataprocCreateBatchOperator
 
-LOCAL_DAGS_PATH = "/home/airflow/gcs/dags"
-if LOCAL_DAGS_PATH not in sys.path:
-    sys.path.append(LOCAL_DAGS_PATH)
-
 GCS_BUCKET = os.environ.get("GCS_BUCKET")
-GCS_DAGS_PATH = f"{GCS_BUCKET}/dags"
+GCS_DAGS_PATH = f"gs://{GCS_BUCKET}/dags"
 DATALAKE_BUCKET = Variable.get("datalake_bucket")
 
 def log_debug_info():
@@ -21,7 +17,7 @@ def log_debug_info():
     dags_path = conf.get("core", "dags_folder").rstrip("/")
     print(f"--- DEBUG: conf core dags_folder is {dags_path} ---")
     print(f"--- DEBUG: GCS_BUCKET env var is {os.environ.get('GCS_BUCKET')} ---")
-    print(f"--- DEBUG: Resolved GCS_DAGS_PATH is {os.environ.get('GCS_BUCKET')}/dags ---")
+    print(f"--- DEBUG: Resolved GCS_DAGS_PATH is gs://{os.environ.get('GCS_BUCKET')}/dags ---")
 
 DEFAULT_ARGS = {
     "owner": "airflow",
