@@ -6,6 +6,8 @@ from airflow.providers.google.cloud.operators.dataproc import DataprocCreateBatc
 
 DAGS_GCS_PATH = conf.get("core", "dags_folder").rstrip("/")
 
+print(f"--- DEBUG: DAGS_GCS_PATH is {DAGS_GCS_PATH} ---")
+
 DEFAULT_ARGS = {
     "owner": "airflow",
     "depends_on_past": False,
