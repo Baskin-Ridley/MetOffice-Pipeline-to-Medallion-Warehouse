@@ -2,7 +2,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_utc_timestamp, date_format, current_timestamp, input_file_name, regexp_replace, regexp_extract, lit, sha2, concat_ws
 import uuid
 from upath import UPath
-from common.file_utils import get_latest_version_paths
+from file_utils import get_latest_version_paths
 import os
 from airflow.models import Variable
 
