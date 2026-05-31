@@ -13,6 +13,13 @@ if DAGS_GCS_PATH not in sys.path:
 
 DATALAKE_BUCKET = Variable.get("datalake_bucket")
 
+def log_debug_info():
+    from airflow.configuration import conf
+    dags_path = conf.get("core", "dags_folder").rstrip("/")
+    print(f"--- DEBUG: conf core dags_folder is {dags_path} ---")
+    print(f"--- DEBUG: GCS_BUCKET env var is {os.environ.get('GCS_BUCKET')} ---")
+    print(f"--- DEBUG: Resolved GCS_DAGS_PATH is {os.environ.get('GCS_BUCKET')}/dags ---")
+
 DEFAULT_ARGS = {
     "owner": "airflow",
     "depends_on_past": False,
