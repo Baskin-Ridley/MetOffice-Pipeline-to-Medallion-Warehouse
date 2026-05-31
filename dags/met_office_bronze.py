@@ -57,7 +57,7 @@ with DAG(
             },
             "runtime_config": {
                 "properties": {
-                    "spark.jars.packages": "io.delta:delta-spark_2.12:3.1.0"
+                    "spark.jars.packages": "io.delta:delta-spark_2.13:3.1.0"
                 }
             }
         },
@@ -73,7 +73,7 @@ with DAG(
             },
             "runtime_config": {
                 "properties": {
-                    "spark.jars.packages": "io.delta:delta-spark_2.12:3.1.0"
+                    "spark.jars.packages": "io.delta:delta-spark_2.13:3.1.0"
                 }
             }
         },
