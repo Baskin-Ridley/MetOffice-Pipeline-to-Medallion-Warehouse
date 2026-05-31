@@ -1,19 +1,17 @@
+import sys
 from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.configuration import conf
-from airflow.operators.python import PythonOperator
+from airflow.models import Variable
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
-
-from scripts.ingestion.ingest_met_office_land_observations_to_landed import main as ingest_observations_main
-from scripts.ingestion.ingest_met_office_metadata_to_landed import main as ingest_metadata_main
-from scripts.silver.load_met_office_land_observations_to_silver import main as load_observations_silver_main
-from scripts.silver.load_met_office_metadata_to_silver import main as load_metadata_silver_main
-from scripts.gold.load_dim_date import main as load_dim_date_main
-from scripts.gold.load_dim_weather_stations import main as load_dim_weather_stations_main
-from scripts.gold.load_fact_weather_metrics import main as load_fact_weather_metrics_main
+from airflow.providers.google.cloud.operators.dataproc import DataprocCreateBatchOperator
 
 DAGS_GCS_PATH = conf.get("core", "dags_folder").rstrip("/")
+if DAGS_GCS_PATH not in sys.path:
+    sys.path.append(DAGS_GCS_PATH)
+
+DATALAKE_BUCKET = Variable.get("datalake_bucket")
 
 DEFAULT_ARGS = {
     "owner": "airflow",
@@ -29,7 +27,7 @@ DEFAULT_ARGS = {
 with DAG(
     dag_id="met_office_full_pipeline",
     default_args=DEFAULT_ARGS,
-    description="End-to-end Met Office medallion pipeline including ingestion and all transformation layers",
+    description="Master controller",
     schedule_interval="@daily",
     start_date=datetime(2026, 5, 23),
     catchup=False,
@@ -37,68 +35,23 @@ with DAG(
     tags=["met-office", "full-pipeline"],
 ) as dag:
 
-    # --- METADATA PIPELINE TRACK ---
-    ingest_metadata = PythonOperator(
-        task_id="ingest_met_office_metadata",
-        python_callable=ingest_metadata_main,
-    )
-
-    trigger_metadata_bronze = TriggerDagRunOperator(
-        task_id="trigger_metadata_bronze",
-        trigger_dag_id="met_office_bronze",
-        conf={"run_mode": "metadata"},
+    trigger_ingestion_layer = TriggerDagRunOperator(
+        task_id="trigger_met_office_api_ingestion",
+        trigger_dag_id="met_office_api_ingestion",
         wait_for_completion=True,
         reset_dag_run=True,
     )
 
-    metadata_silver = PythonOperator(
-        task_id="load_met_office_metadata_to_silver",
-        python_callable=load_metadata_silver_main,
+    metadata_bronze = DataprocCreateBatchOperator(
+        task_id="load_met_office_metadata_to_bronze",
+        batch_id="met-office-metadata-{{ ds_nodash }}-{{ task_instance.try_number }}",
+        batch={
+            "pyspark_batch": {
+                "main_python_file_uri": f"{DAGS_GCS_PATH}/scripts/bronze/load_met_office_metadata_to_bronze.py",
+                "python_file_uris": [f"{DAGS_GCS_PATH}/scripts/common/file_utils.py"],
+                "args": [DATALAKE_BUCKET],
+            }
+        },
     )
 
-    # --- OBSERVATIONS PIPELINE TRACK ---
-    ingest_observations = PythonOperator(
-        task_id="ingest_met_office_observations",
-        python_callable=ingest_observations_main,
-    )
-
-    trigger_observations_bronze = TriggerDagRunOperator(
-        task_id="trigger_observations_bronze",
-        trigger_dag_id="met_office_bronze",
-        conf={"run_mode": "observations"},
-        wait_for_completion=True,
-        reset_dag_run=True,
-    )
-
-    observations_silver = PythonOperator(
-        task_id="load_met_office_land_observations_to_silver",
-        python_callable=load_observations_silver_main,
-    )
-
-    # --- GOLD LAYER ---
-    dim_date = PythonOperator(
-        task_id="load_dim_date",
-        python_callable=load_dim_date_main,
-    )
-
-    dim_weather_stations = PythonOperator(
-        task_id="load_dim_weather_stations",
-        python_callable=load_dim_weather_stations_main,
-    )
-
-    fact_weather_metrics = PythonOperator(
-        task_id="load_fact_weather_metrics",
-        python_callable=load_fact_weather_metrics_main,
-    )
-
-    # --- LINEAR DEPENDENCY PIPELINE MAP ---
-    
-    # 1. Force the entire Metadata lifecycle to finish all the way through Silver first
-    ingest_metadata >> trigger_metadata_bronze >> metadata_silver
-
-    # 2. Start observations only after Metadata hits Silver
-    metadata_silver >> ingest_observations >> trigger_observations_bronze >> observations_silver
-
-    # 3. Gold operations branch out independently as soon as their respective source layers finish
-    metadata_silver >> dim_date >> dim_weather_stations
-    observations_silver >> fact_weather_metrics
+    trigger_ingestion_layer >> metadata_bronze
