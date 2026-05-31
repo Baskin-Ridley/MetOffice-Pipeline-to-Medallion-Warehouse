@@ -1,11 +1,10 @@
 from datetime import datetime, timedelta
-from airflow import DAG
-from airflow.providers.google.cloud.operators.dataproc import DataprocCreateBatchOperator
-from airflow.models import Variable
 
-PROJECT_ID = "noaa-medallion-warehouse"
-REGION = "europe-west2"
-BUCKET_NAME = Variable.get("datalake_bucket", "your-gcp-datalake-bucket")
+from airflow import DAG
+from airflow.configuration import conf
+from airflow.providers.google.cloud.operators.dataproc import DataprocCreateBatchOperator
+
+DAGS_GCS_PATH = conf.get("core", "dags_folder").rstrip("/")
 
 DEFAULT_ARGS = {
     "owner": "airflow",
@@ -14,6 +13,8 @@ DEFAULT_ARGS = {
     "email_on_retry": False,
     "retries": 1,
     "retry_delay": timedelta(minutes=10),
+    "project_id": "noaa-medallion-warehouse",
+    "region": "europe-west2",
 }
 
 with DAG(
@@ -28,28 +29,24 @@ with DAG(
 
     metadata_bronze = DataprocCreateBatchOperator(
         task_id="load_met_office_metadata_to_bronze",
-        project_id=PROJECT_ID,
-        region=REGION,
         batch_id="met-office-metadata-{{ ds_nodash }}-{{ task_instance.try_number }}",
         batch={
             "pyspark_batch": {
-                "main_python_file_uri": f"gs://{BUCKET_NAME}/scripts/bronze/load_met_office_metadata_to_bronze.py",
-                "python_file_uris": [f"gs://{BUCKET_NAME}/scripts/common/file_utils.py"]
+                "main_python_file_uri": f"{DAGS_GCS_PATH}/scripts/bronze/load_met_office_metadata_to_bronze.py",
+                "python_file_uris": [f"{DAGS_GCS_PATH}/scripts/common/file_utils.py"],
             }
-        }
+        },
     )
 
     observations_bronze = DataprocCreateBatchOperator(
         task_id="load_met_office_land_observations_to_bronze",
-        project_id=PROJECT_ID,
-        region=REGION,
         batch_id="met-office-obs-{{ ds_nodash }}-{{ task_instance.try_number }}",
         batch={
             "pyspark_batch": {
-                "main_python_file_uri": f"gs://{BUCKET_NAME}/scripts/bronze/load_met_office_land_observations_to_bronze.py",
-                "python_file_uris": [f"gs://{BUCKET_NAME}/scripts/common/file_utils.py"]
+                "main_python_file_uri": f"{DAGS_GCS_PATH}/scripts/bronze/load_met_office_land_observations_to_bronze.py",
+                "python_file_uris": [f"{DAGS_GCS_PATH}/scripts/common/file_utils.py"],
             }
-        }
+        },
     )
 
     metadata_bronze >> observations_bronze
