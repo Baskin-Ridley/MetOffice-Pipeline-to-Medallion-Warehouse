@@ -51,7 +51,12 @@ with DAG(
             "pyspark_batch": {
                 "main_python_file_uri": f"{DAGS_GCS_PATH}/scripts/bronze/load_met_office_metadata_to_bronze.py",
                 "python_file_uris": [f"{DAGS_GCS_PATH}/scripts/common/file_utils.py"],
+            },
+            "runtime_config": {
+            "properties": {
+                "spark.jars.packages": "io.delta:delta-spark_2.12:3.1.0"
             }
+        }
         },
     )
 
@@ -62,7 +67,12 @@ with DAG(
             "pyspark_batch": {
                 "main_python_file_uri": f"{DAGS_GCS_PATH}/scripts/bronze/load_met_office_land_observations_to_bronze.py",
                 "python_file_uris": [f"{DAGS_GCS_PATH}/common/file_utils.py"],
+            },
+            "runtime_config": {
+            "properties": {
+                "spark.jars.packages": "io.delta:delta-spark_2.12:3.1.0"
             }
+        }
         },
         trigger_rule=TriggerRule.NONE_FAILED_MIN_ONE_SUCCESS,
     )

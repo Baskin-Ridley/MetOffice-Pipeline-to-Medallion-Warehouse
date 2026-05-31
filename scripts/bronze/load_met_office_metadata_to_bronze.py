@@ -35,8 +35,9 @@ def main():
     print("connecting to spark...")
     spark = SparkSession.builder \
         .appName("MetOffice Metadata landed to bronze") \
+        .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
+        .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
         .getOrCreate()
-
     landed_pattern, version_id, output_path = get_latest_version_paths(
         LANDED_BASE_DIR, 
         BRONZE_DIR
