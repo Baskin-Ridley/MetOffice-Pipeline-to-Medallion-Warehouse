@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.configuration import conf
-from airflow.operators.branch import BranchPythonOperator
+from airflow.operators.python import BranchPythonOperator
 from airflow.providers.google.cloud.operators.dataproc import DataprocCreateBatchOperator
 from airflow.utils.trigger_rule import TriggerRule
 
