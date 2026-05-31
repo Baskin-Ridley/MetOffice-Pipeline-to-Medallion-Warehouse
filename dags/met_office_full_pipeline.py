@@ -68,7 +68,7 @@ with DAG(
 
     observations_bronze = DataprocCreateBatchOperator(
         task_id="load_met_office_land_observations_to_bronze",
-        batch_id="met-office-obs-{{ ds_nodash }}-{{ task_instance.try_number }}",
+        batch_id="met-office-obs-{{ ts_nodash | lower }}-{{ task_instance.try_number }}",
         batch={
             "pyspark_batch": {
                 "main_python_file_uri": f"{DAGS_GCS_PATH}/scripts/bronze/load_met_office_land_observations_to_bronze.py",
