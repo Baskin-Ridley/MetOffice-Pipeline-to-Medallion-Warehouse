@@ -2,11 +2,11 @@ from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.configuration import conf
+from airflow.operators.branch import BranchPythonOperator
 from airflow.providers.google.cloud.operators.dataproc import DataprocCreateBatchOperator
+from airflow.utils.trigger_rule import TriggerRule
 
 DAGS_GCS_PATH = conf.get("core", "dags_folder").rstrip("/")
-
-print(f"--- DEBUG: DAGS_GCS_PATH is {DAGS_GCS_PATH} ---")
 
 DEFAULT_ARGS = {
     "owner": "airflow",
@@ -19,6 +19,14 @@ DEFAULT_ARGS = {
     "region": "europe-west2",
 }
 
+def determine_bronze_branch(**context):
+    """Checks if a specific run mode was requested by the caller pipeline."""
+    run_mode = context["dag_run"].conf.get("run_mode", "all")
+    
+    if run_mode == "observations":
+        return "load_met_office_land_observations_to_bronze"
+    return "load_met_office_metadata_to_bronze"
+
 with DAG(
     dag_id="met_office_bronze",
     default_args=DEFAULT_ARGS,
@@ -28,6 +36,11 @@ with DAG(
     catchup=False,
     tags=["met-office", "bronze"],
 ) as dag:
+
+    check_run_mode = BranchPythonOperator(
+        task_id="check_run_mode",
+        python_callable=determine_bronze_branch,
+    )
 
     metadata_bronze = DataprocCreateBatchOperator(
         task_id="load_met_office_metadata_to_bronze",
@@ -49,6 +62,8 @@ with DAG(
                 "python_file_uris": [f"{DAGS_GCS_PATH}/scripts/common/file_utils.py"],
             }
         },
+        trigger_rule=TriggerRule.NONE_FAILED_MIN_ONE_SUCCESS,
     )
 
-    metadata_bronze >> observations_bronze
+    check_run_mode >> metadata_bronze >> observations_bronze
+    check_run_mode >> observations_bronze

@@ -2,9 +2,8 @@ from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.configuration import conf
-from airflow.models import Variable
 from airflow.operators.python import PythonOperator
-from airflow.providers.google.cloud.operators.dataproc import DataprocCreateBatchOperator
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 
 from scripts.ingestion.ingest_met_office_land_observations_to_landed import main as ingest_observations_main
 from scripts.ingestion.ingest_met_office_metadata_to_landed import main as ingest_metadata_main
@@ -15,7 +14,6 @@ from scripts.gold.load_dim_weather_stations import main as load_dim_weather_stat
 from scripts.gold.load_fact_weather_metrics import main as load_fact_weather_metrics_main
 
 DAGS_GCS_PATH = conf.get("core", "dags_folder").rstrip("/")
-DATALAKE_BUCKET = Variable.get("datalake_bucket")
 
 DEFAULT_ARGS = {
     "owner": "airflow",
@@ -39,21 +37,18 @@ with DAG(
     tags=["met-office", "full-pipeline"],
 ) as dag:
 
+    # --- METADATA PIPELINE TRACK ---
     ingest_metadata = PythonOperator(
         task_id="ingest_met_office_metadata",
         python_callable=ingest_metadata_main,
     )
 
-    metadata_bronze = DataprocCreateBatchOperator(
-        task_id="load_met_office_metadata_to_bronze",
-        batch_id="met-office-metadata-{{ ds_nodash }}-{{ task_instance.try_number }}",
-        batch={
-            "pyspark_batch": {
-                "main_python_file_uri": f"{DAGS_GCS_PATH}/scripts/bronze/load_met_office_metadata_to_bronze.py",
-                "python_file_uris": [f"{DAGS_GCS_PATH}/scripts/common/file_utils.py"],
-                "args": [DATALAKE_BUCKET],
-            }
-        },
+    trigger_metadata_bronze = TriggerDagRunOperator(
+        task_id="trigger_metadata_bronze",
+        trigger_dag_id="met_office_bronze",
+        conf={"run_mode": "metadata"},
+        wait_for_completion=True,
+        reset_dag_run=True,
     )
 
     metadata_silver = PythonOperator(
@@ -61,21 +56,18 @@ with DAG(
         python_callable=load_metadata_silver_main,
     )
 
+    # --- OBSERVATIONS PIPELINE TRACK ---
     ingest_observations = PythonOperator(
         task_id="ingest_met_office_observations",
         python_callable=ingest_observations_main,
     )
 
-    observations_bronze = DataprocCreateBatchOperator(
-        task_id="load_met_office_land_observations_to_bronze",
-        batch_id="met-office-obs-{{ ts_nodash | lower }}-{{ task_instance.try_number }}",
-        batch={
-            "pyspark_batch": {
-                "main_python_file_uri": f"{DAGS_GCS_PATH}/scripts/bronze/load_met_office_land_observations_to_bronze.py",
-                "python_file_uris": [f"{DAGS_GCS_PATH}/scripts/common/file_utils.py"],
-                "args": [DATALAKE_BUCKET],
-            }
-        },
+    trigger_observations_bronze = TriggerDagRunOperator(
+        task_id="trigger_observations_bronze",
+        trigger_dag_id="met_office_bronze",
+        conf={"run_mode": "observations"},
+        wait_for_completion=True,
+        reset_dag_run=True,
     )
 
     observations_silver = PythonOperator(
@@ -83,6 +75,7 @@ with DAG(
         python_callable=load_observations_silver_main,
     )
 
+    # --- GOLD LAYER ---
     dim_date = PythonOperator(
         task_id="load_dim_date",
         python_callable=load_dim_date_main,
@@ -98,8 +91,14 @@ with DAG(
         python_callable=load_fact_weather_metrics_main,
     )
 
-    ingest_metadata >> metadata_bronze >> metadata_silver >> ingest_observations >> observations_bronze >> observations_silver
-    metadata_silver >> dim_weather_stations
+    # --- LINEAR DEPENDENCY PIPELINE MAP ---
+    
+    # 1. Force the entire Metadata lifecycle to finish all the way through Silver first
+    ingest_metadata >> trigger_metadata_bronze >> metadata_silver
+
+    # 2. Start observations only after Metadata hits Silver
+    metadata_silver >> ingest_observations >> trigger_observations_bronze >> observations_silver
+
+    # 3. Gold operations branch out independently as soon as their respective source layers finish
+    metadata_silver >> dim_date >> dim_weather_stations
     observations_silver >> fact_weather_metrics
-    metadata_silver >> dim_date
-    dim_date >> dim_weather_stations
