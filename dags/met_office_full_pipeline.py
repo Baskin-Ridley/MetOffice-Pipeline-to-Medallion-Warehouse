@@ -59,7 +59,7 @@ with DAG(
         batch={
             "pyspark_batch": {
                 "main_python_file_uri": f"{GCS_DAGS_PATH}/scripts/bronze/load_met_office_metadata_to_bronze.py",
-                "python_file_uris": [f"{GCS_DAGS_PATH}/scripts/common/file_utils.py"],
+                "python_file_uris": [f"{GCS_DAGS_PATH}/common/file_utils.py"],
                 "args": [DATALAKE_BUCKET],
             }
         },
