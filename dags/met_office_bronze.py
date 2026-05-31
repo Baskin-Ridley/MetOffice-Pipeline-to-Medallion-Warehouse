@@ -61,7 +61,7 @@ with DAG(
         batch={
             "pyspark_batch": {
                 "main_python_file_uri": f"{DAGS_GCS_PATH}/scripts/bronze/load_met_office_land_observations_to_bronze.py",
-                "python_file_uris": [f"{DAGS_GCS_PATH}/scripts/common/file_utils.py"],
+                "python_file_uris": [f"{DAGS_GCS_PATH}/common/file_utils.py"],
             }
         },
         trigger_rule=TriggerRule.NONE_FAILED_MIN_ONE_SUCCESS,
