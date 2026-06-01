@@ -114,6 +114,19 @@ with DAG(
         reset_dag_run=True,
     )
 
+    trigger_gold_layer = TriggerDagRunOperator(
+        task_id="trigger_met_office_gold",
+        trigger_dag_id="met_office_gold",
+        conf={
+            "run_mode": "all",
+            "gcs_dags_path": GCS_DAGS_PATH,
+            "datalake_bucket": DATALAKE_BUCKET,
+            "spark_jars_packages": "io.delta:delta-spark_2.13:3.1.0",
+        },
+        wait_for_completion=True,
+        reset_dag_run=True,
+    )
+
     (
         debug_check
         >> trigger_ingestion_layer
@@ -122,4 +135,5 @@ with DAG(
         >> trigger_observations_ingestion
         >> trigger_bronze_observations
         >> trigger_silver_observations
+        >> trigger_gold_layer
     )

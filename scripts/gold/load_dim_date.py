@@ -1,30 +1,19 @@
-import os
-
-from pyspark.sql import SparkSession
+import sys
 from pyspark.sql.functions import (
-    explode, sequence, to_date, col, date_format, 
+    explode, sequence, to_date, col, date_format,
     year, month, dayofmonth, quarter, when, lit
 )
-from upath import UPath
-from common.file_utils import start_spark_session
-from airflow.models import Variable
+from file_utils import start_spark_session
 
-BUCKET_NAME = Variable.get("datalake_bucket", "your-gcp-datalake-bucket")
-DATALAKE_ROOT = UPath(f"gs://{BUCKET_NAME}")
-GOLD_DIM_DIR = DATALAKE_ROOT / "gold/master/dim_date"
 
 def generate_dim_date(spark, start_date="2020-01-01", end_date="2031-12-31"):
-    """
-    Manufactures a comprehensive Date Dimension.
-    """
-    # Generate a range of dates
     df = spark.createDataFrame([(start_date, end_date)], ["start", "end"])
-    
+
     dim_date = df.select(
         explode(sequence(to_date(col("start")), to_date(col("end")))).alias("FullDate")
     )
 
-    df_transformed = dim_date.select(
+    return dim_date.select(
         date_format(col("FullDate"), "yyyyMMdd").cast("int").alias("DateKey"),
         col("FullDate"),
         year(col("FullDate")).alias("Year"),
@@ -42,27 +31,31 @@ def generate_dim_date(spark, start_date="2020-01-01", end_date="2031-12-31"):
         lit("met_office_calendar").alias("SourceSystem")
     )
 
-    return df_transformed
 
 def main():
+    if len(sys.argv) < 2:
+        raise ValueError("Missing required datalake bucket argument.")
+
+    BUCKET_NAME = sys.argv[1]
+    GOLD_DIM_DIR = f"gs://{BUCKET_NAME}/gold/master/dim_date"
+
     spark = start_spark_session("Generate Gold DimDate")
 
-    print(f"Generating Date Dimension...")
+    print("Generating Date Dimension...")
     df_dim_date = generate_dim_date(spark)
-
 
     print(f"Writing DimDate to: {GOLD_DIM_DIR}")
     df_dim_date.write.format("delta") \
         .mode("overwrite") \
         .option("mergeSchema", "true") \
-        .save(str(GOLD_DIM_DIR))
+        .save(GOLD_DIM_DIR)
 
     spark.sql(f"CREATE TABLE IF NOT EXISTS DimDate USING DELTA LOCATION '{GOLD_DIM_DIR}'")
 
     print("DimDate successfully initialized. Sample output:")
     df_dim_date.show(5)
-    
     spark.stop()
+
 
 if __name__ == "__main__":
     main()

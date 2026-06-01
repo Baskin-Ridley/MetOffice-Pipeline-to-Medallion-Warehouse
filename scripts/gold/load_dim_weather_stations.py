@@ -1,20 +1,21 @@
-import os
+import sys
 from pyspark.sql.functions import col, lit, current_timestamp
-from upath import UPath
-from common.file_utils import start_spark_session
-from airflow.models import Variable
+from file_utils import start_spark_session
 
-BUCKET_NAME = Variable.get("datalake_bucket", "your-gcp-datalake-bucket")
-DATALAKE_ROOT = UPath(f"gs://{BUCKET_NAME}")
-
-STATION_METADATA_SILVER_DIR = DATALAKE_ROOT / "silver/met_office/station_metadata"
-GOLD_DIR = DATALAKE_ROOT / "gold/weather/dim_weather_stations"
 
 def main():
+    if len(sys.argv) < 2:
+        raise ValueError("Missing required datalake bucket argument.")
+
+    BUCKET_NAME = sys.argv[1]
+    DATALAKE_ROOT = f"gs://{BUCKET_NAME}"
+    STATION_METADATA_SILVER_DIR = f"{DATALAKE_ROOT}/silver/met_office/station_metadata"
+    GOLD_DIR = f"{DATALAKE_ROOT}/gold/weather/dim_weather_stations"
+
     spark = start_spark_session("MetOffice Weather Stations Gold Dimension")
-    
-    df_updates = spark.read.format("delta").load(str(STATION_METADATA_SILVER_DIR))
-    
+
+    df_updates = spark.read.format("delta").load(STATION_METADATA_SILVER_DIR)
+
     df_gold = df_updates.select(
         col("station_geohash").alias("StationKey"),
         col("station_name").alias("StationName"),
@@ -34,16 +35,12 @@ def main():
     )
 
     try:
-        df_existing = spark.read.format("delta").load(str(GOLD_DIR))
+        df_existing = spark.read.format("delta").load(GOLD_DIR)
         current_existing = df_existing.filter(col("IsCurrent") == True).select("StationKey", "RowHash")
 
         df_changed = (
             df_gold.alias("updates")
-            .join(
-                current_existing.alias("current"),
-                on="StationKey",
-                how="left"
-            )
+            .join(current_existing.alias("current"), on="StationKey", how="left")
             .filter(
                 (col("current.StationKey").isNull()) |
                 (col("updates.RowHash") != col("current.RowHash"))
@@ -60,18 +57,18 @@ def main():
                 WHEN MATCHED THEN
                   UPDATE SET IsCurrent = false, EffEndDate = current_timestamp()
             """)
-            df_changed.write.format("delta").mode("append").save(str(GOLD_DIR))
+            df_changed.write.format("delta").mode("append").save(GOLD_DIR)
         else:
             print("No station metadata changes detected; skipping gold append.")
 
     except Exception:
-        # Initial Load if table doesn't exist
         print("Table not found. Performing initial load...")
-        df_gold.write.format("delta").mode("overwrite").save(str(GOLD_DIR))
+        df_gold.write.format("delta").mode("overwrite").save(GOLD_DIR)
 
-    print(f"DimWeatherStations written to {GOLD_DIR}. schema:")
+    print(f"DimWeatherStations written to {GOLD_DIR}. Schema:")
     df_gold.printSchema()
     spark.stop()
+
 
 if __name__ == "__main__":
     main()

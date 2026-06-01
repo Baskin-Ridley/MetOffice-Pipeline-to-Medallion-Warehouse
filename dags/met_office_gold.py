@@ -1,11 +1,14 @@
+import os
 from datetime import datetime, timedelta
 
 from airflow import DAG
-from airflow.operators.python import PythonOperator
+from airflow.models import Variable
+from airflow.operators.python import BranchPythonOperator
+from airflow.providers.google.cloud.operators.dataproc import DataprocCreateBatchOperator
 
-from scripts.gold.load_dim_date import main as load_dim_date_main
-from scripts.gold.load_dim_weather_stations import main as load_dim_weather_stations_main
-from scripts.gold.load_fact_weather_metrics import main as load_fact_weather_metrics_main
+GCS_BUCKET = os.environ.get("GCS_BUCKET")
+DAGS_GCS_PATH = f"gs://{GCS_BUCKET}/dags"
+DATALAKE_BUCKET = Variable.get("datalake_bucket")
 
 DEFAULT_ARGS = {
     "owner": "airflow",
@@ -14,7 +17,21 @@ DEFAULT_ARGS = {
     "email_on_retry": False,
     "retries": 1,
     "retry_delay": timedelta(minutes=10),
+    "project_id": "noaa-medallion-warehouse",
+    "region": "europe-west2",
 }
+
+
+def determine_gold_branch(**context):
+    """Checks if a specific run mode was requested by the caller pipeline."""
+    run_mode = context["dag_run"].conf.get("run_mode", "all")
+
+    if run_mode == "dimensions":
+        return ["load_dim_date", "load_dim_weather_stations"]
+    elif run_mode == "facts":
+        return "load_fact_weather_metrics"
+    return ["load_dim_date", "load_dim_weather_stations"]
+
 
 with DAG(
     dag_id="met_office_gold",
@@ -24,21 +41,67 @@ with DAG(
     start_date=datetime(2026, 5, 23),
     catchup=False,
     tags=["met-office", "gold"],
+    params={
+        "gcs_dags_path": DAGS_GCS_PATH,
+        "datalake_bucket": DATALAKE_BUCKET,
+        "spark_jars_packages": "io.delta:delta-spark_2.13:3.1.0",
+    },
 ) as dag:
 
-    dim_date = PythonOperator(
+    check_run_mode = BranchPythonOperator(
+        task_id="check_run_mode",
+        python_callable=determine_gold_branch,
+    )
+
+    dim_date = DataprocCreateBatchOperator(
         task_id="load_dim_date",
-        python_callable=load_dim_date_main,
+        batch_id="met-office-dim-date-{{ ts_nodash | lower }}-{{ task_instance.try_number }}",
+        batch={
+            "pyspark_batch": {
+                "main_python_file_uri": "{{ params.gcs_dags_path }}/scripts/gold/load_dim_date.py",
+                "python_file_uris": ["{{ params.gcs_dags_path }}/common/file_utils.py"],
+                "args": ["{{ params.datalake_bucket }}"],
+            },
+            "runtime_config": {
+                "properties": {
+                    "spark.jars.packages": "{{ params.spark_jars_packages }}"
+                }
+            }
+        },
     )
 
-    dim_weather_stations = PythonOperator(
+    dim_weather_stations = DataprocCreateBatchOperator(
         task_id="load_dim_weather_stations",
-        python_callable=load_dim_weather_stations_main,
+        batch_id="met-office-dim-stations-{{ ts_nodash | lower }}-{{ task_instance.try_number }}",
+        batch={
+            "pyspark_batch": {
+                "main_python_file_uri": "{{ params.gcs_dags_path }}/scripts/gold/load_dim_weather_stations.py",
+                "python_file_uris": ["{{ params.gcs_dags_path }}/common/file_utils.py"],
+                "args": ["{{ params.datalake_bucket }}"],
+            },
+            "runtime_config": {
+                "properties": {
+                    "spark.jars.packages": "{{ params.spark_jars_packages }}"
+                }
+            }
+        },
     )
 
-    fact_weather_metrics = PythonOperator(
+    fact_weather_metrics = DataprocCreateBatchOperator(
         task_id="load_fact_weather_metrics",
-        python_callable=load_fact_weather_metrics_main,
+        batch_id="met-office-fact-metrics-{{ ts_nodash | lower }}-{{ task_instance.try_number }}",
+        batch={
+            "pyspark_batch": {
+                "main_python_file_uri": "{{ params.gcs_dags_path }}/scripts/gold/load_fact_weather_metrics.py",
+                "python_file_uris": ["{{ params.gcs_dags_path }}/common/file_utils.py"],
+                "args": ["{{ params.datalake_bucket }}"],
+            },
+            "runtime_config": {
+                "properties": {
+                    "spark.jars.packages": "{{ params.spark_jars_packages }}"
+                }
+            }
+        },
     )
 
-    dim_date >> dim_weather_stations >> fact_weather_metrics
+    check_run_mode >> [dim_date, dim_weather_stations] >> fact_weather_metrics
