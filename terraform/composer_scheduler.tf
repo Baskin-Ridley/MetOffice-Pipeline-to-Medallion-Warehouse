@@ -9,12 +9,10 @@
 #   Cloud Scheduler → Cloud Run Job (google/cloud-sdk) → gcloud composer update
 #=========================================
 
-# ── Service Account ────────────────────────────────────────────────────────────
-resource "google_service_account" "composer_scheduler" {
-  count        = var.environment == "gcp" ? 1 : 0
-  account_id   = "composer-scheduler"
-  display_name = "Composer Pause/Resume Scheduler"
-  project      = var.project_id
+# Reuse the default Compute Engine SA that Composer already uses — avoids
+# needing iam.serviceAccounts.create in the Cloud Build service account.
+locals {
+  scheduler_sa = "${var.project_number}-compute@developer.gserviceaccount.com"
 }
 
 # ── IAM ───────────────────────────────────────────────────────────────────────
@@ -24,7 +22,7 @@ resource "google_project_iam_member" "composer_scheduler_composer_admin" {
   count   = var.environment == "gcp" ? 1 : 0
   project = var.project_id
   role    = "roles/composer.admin"
-  member  = "serviceAccount:${google_service_account.composer_scheduler[0].email}"
+  member  = "serviceAccount:${local.scheduler_sa}"
 }
 
 # Allows Cloud Scheduler to trigger the Cloud Run Jobs
@@ -32,7 +30,7 @@ resource "google_project_iam_member" "composer_scheduler_run_invoker" {
   count   = var.environment == "gcp" ? 1 : 0
   project = var.project_id
   role    = "roles/run.invoker"
-  member  = "serviceAccount:${google_service_account.composer_scheduler[0].email}"
+  member  = "serviceAccount:${local.scheduler_sa}"
 }
 
 # ── Cloud Run Jobs ─────────────────────────────────────────────────────────────
@@ -44,7 +42,7 @@ resource "google_cloud_run_v2_job" "composer_pause" {
 
   template {
     template {
-      service_account = google_service_account.composer_scheduler[0].email
+      service_account = local.scheduler_sa
       max_retries     = 1
 
       containers {
@@ -73,7 +71,7 @@ resource "google_cloud_run_v2_job" "composer_resume" {
 
   template {
     template {
-      service_account = google_service_account.composer_scheduler[0].email
+      service_account = local.scheduler_sa
       max_retries     = 1
 
       containers {
@@ -109,7 +107,7 @@ resource "google_cloud_scheduler_job" "composer_pause" {
     uri = "https://run.googleapis.com/v2/projects/${var.project_id}/locations/${var.region}/jobs/${google_cloud_run_v2_job.composer_pause[0].name}:run"
 
     oauth_token {
-      service_account_email = google_service_account.composer_scheduler[0].email
+      service_account_email = local.scheduler_sa
     }
   }
 }
@@ -126,7 +124,7 @@ resource "google_cloud_scheduler_job" "composer_resume" {
     uri = "https://run.googleapis.com/v2/projects/${var.project_id}/locations/${var.region}/jobs/${google_cloud_run_v2_job.composer_resume[0].name}:run"
 
     oauth_token {
-      service_account_email = google_service_account.composer_scheduler[0].email
+      service_account_email = local.scheduler_sa
     }
   }
 }
