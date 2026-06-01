@@ -88,7 +88,7 @@ steps:
 
         gcloud composer environments run "$$COMPOSER_ENV" --location "${_REGION}" variables -- import /home/airflow/gcs/data/airflow_variables.json
 
-timeout: '18000s'
+timeout: '600s'
 options:
   logging: CLOUD_LOGGING_ONLY
 
