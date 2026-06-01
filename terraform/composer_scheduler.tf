@@ -47,15 +47,9 @@ resource "google_cloud_run_v2_job" "composer_pause" {
 
       containers {
         image   = "google/cloud-sdk:slim"
-        command = ["gcloud"]
+        command = ["/bin/bash", "-c"]
         args = [
-          "composer", "environments", "update",
-          "${var.project_id}-composer",
-          "--location=${var.region}",
-          "--project=${var.project_id}",
-          "--pause",
-          "--async",
-          "--quiet",
+          "TOKEN=$(gcloud auth print-access-token --project=${var.project_id}) && curl -sf -X PATCH \"https://composer.googleapis.com/v1/projects/${var.project_id}/locations/${var.region}/environments/${var.project_id}-composer?updateMask=state\" -H \"Authorization: Bearer $TOKEN\" -H 'Content-Type: application/json' -d '{\"state\":\"PAUSED\"}' && echo 'Pause initiated'"
         ]
       }
     }
@@ -76,15 +70,9 @@ resource "google_cloud_run_v2_job" "composer_resume" {
 
       containers {
         image   = "google/cloud-sdk:slim"
-        command = ["gcloud"]
+        command = ["/bin/bash", "-c"]
         args = [
-          "composer", "environments", "update",
-          "${var.project_id}-composer",
-          "--location=${var.region}",
-          "--project=${var.project_id}",
-          "--resume",
-          "--async",
-          "--quiet",
+          "TOKEN=$(gcloud auth print-access-token --project=${var.project_id}) && curl -sf -X PATCH \"https://composer.googleapis.com/v1/projects/${var.project_id}/locations/${var.region}/environments/${var.project_id}-composer?updateMask=state\" -H \"Authorization: Bearer $TOKEN\" -H 'Content-Type: application/json' -d '{\"state\":\"RUNNING\"}' && echo 'Resume initiated'"
         ]
       }
     }
