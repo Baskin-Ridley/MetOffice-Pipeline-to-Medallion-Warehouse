@@ -55,6 +55,7 @@ with DAG(
         task_id="trigger_met_office_bronze",
         trigger_dag_id="met_office_bronze",
         conf={
+            "run_mode": "metadata_only",
             "gcs_dags_path": GCS_DAGS_PATH,
             "datalake_bucket": DATALAKE_BUCKET,
             "spark_jars_packages": "io.delta:delta-spark_2.13:3.1.0",

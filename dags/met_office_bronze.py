@@ -6,7 +6,6 @@ from airflow.configuration import conf
 from airflow.models import Variable
 from airflow.operators.python import BranchPythonOperator
 from airflow.providers.google.cloud.operators.dataproc import DataprocCreateBatchOperator
-from airflow.utils.trigger_rule import TriggerRule
 
 GCS_BUCKET = os.environ.get("GCS_BUCKET")
 DAGS_GCS_PATH = f"gs://{GCS_BUCKET}/dags"
@@ -26,10 +25,12 @@ DEFAULT_ARGS = {
 def determine_bronze_branch(**context):
     """Checks if a specific run mode was requested by the caller pipeline."""
     run_mode = context["dag_run"].conf.get("run_mode", "all")
-    
+
     if run_mode == "observations":
         return "load_met_office_land_observations_to_bronze"
-    return "load_met_office_metadata_to_bronze"
+    elif run_mode == "metadata_only":
+        return "load_met_office_metadata_to_bronze"
+    return ["load_met_office_metadata_to_bronze", "load_met_office_land_observations_to_bronze"]
 
 with DAG(
     dag_id="met_office_bronze",
@@ -82,8 +83,6 @@ with DAG(
                 }
             }
         },
-        trigger_rule=TriggerRule.NONE_FAILED_MIN_ONE_SUCCESS,
     )
 
-    check_run_mode >> metadata_bronze >> observations_bronze
-    check_run_mode >> observations_bronze
+    check_run_mode >> [metadata_bronze, observations_bronze]
