@@ -39,6 +39,11 @@ with DAG(
     start_date=datetime(2026, 5, 23),
     catchup=False,
     tags=["met-office", "bronze"],
+    params={
+        "gcs_dags_path": DAGS_GCS_PATH,
+        "datalake_bucket": DATALAKE_BUCKET,
+        "spark_jars_packages": "io.delta:delta-spark_2.13:3.1.0",
+    },
 ) as dag:
 
     check_run_mode = BranchPythonOperator(
@@ -51,13 +56,13 @@ with DAG(
         batch_id="met-office-metadata-{{ ts_nodash | lower }}-{{ task_instance.try_number }}",
         batch={
             "pyspark_batch": {
-                "main_python_file_uri": f"{DAGS_GCS_PATH}/scripts/bronze/load_met_office_metadata_to_bronze.py",
-                "python_file_uris": [f"{DAGS_GCS_PATH}/common/file_utils.py"],
-                "args": [DATALAKE_BUCKET],
+                "main_python_file_uri": "{{ params.gcs_dags_path }}/scripts/bronze/load_met_office_metadata_to_bronze.py",
+                "python_file_uris": ["{{ params.gcs_dags_path }}/common/file_utils.py"],
+                "args": ["{{ params.datalake_bucket }}"],
             },
             "runtime_config": {
                 "properties": {
-                    "spark.jars.packages": "io.delta:delta-spark_2.13:3.1.0"
+                    "spark.jars.packages": "{{ params.spark_jars_packages }}"
                 }
             }
         },
@@ -68,12 +73,12 @@ with DAG(
         batch_id="met-office-obs-{{ ts_nodash | lower }}-{{ task_instance.try_number }}",
         batch={
             "pyspark_batch": {
-                "main_python_file_uri": f"{DAGS_GCS_PATH}/scripts/bronze/load_met_office_land_observations_to_bronze.py",
-                "python_file_uris": [f"{DAGS_GCS_PATH}/common/file_utils.py"],
+                "main_python_file_uri": "{{ params.gcs_dags_path }}/scripts/bronze/load_met_office_land_observations_to_bronze.py",
+                "python_file_uris": ["{{ params.gcs_dags_path }}/common/file_utils.py"],
             },
             "runtime_config": {
                 "properties": {
-                    "spark.jars.packages": "io.delta:delta-spark_2.13:3.1.0"
+                    "spark.jars.packages": "{{ params.spark_jars_packages }}"
                 }
             }
         },
