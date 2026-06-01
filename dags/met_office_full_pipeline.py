@@ -144,13 +144,9 @@ with DAG(
         reset_dag_run=True,
     )
 
-    (
-        trigger_ingestion_layer
-        >> trigger_bronze_layer
-        >> trigger_silver_layer
-        >> trigger_observations_ingestion
-        >> trigger_bronze_observations
-        >> trigger_silver_observations
-        >> [trigger_gold_dim_date, trigger_gold_dim_stations]
-        >> trigger_gold_facts
-    )
+    trigger_ingestion_layer >> trigger_bronze_layer >> trigger_silver_layer
+
+    trigger_silver_layer >> trigger_observations_ingestion >> trigger_bronze_observations >> trigger_silver_observations
+
+    trigger_silver_layer >> trigger_gold_dim_date >> trigger_gold_dim_stations
+    trigger_silver_observations >> trigger_gold_facts
