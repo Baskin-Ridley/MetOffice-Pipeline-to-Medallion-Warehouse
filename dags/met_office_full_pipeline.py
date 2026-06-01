@@ -28,7 +28,7 @@ with DAG(
     dag_id="met_office_full_pipeline",
     default_args=DEFAULT_ARGS,
     description="Master controller",
-    schedule_interval="@daily",
+    schedule="@daily",
     start_date=DAG_START_DATE,
     catchup=False,
     is_paused_upon_creation=False,

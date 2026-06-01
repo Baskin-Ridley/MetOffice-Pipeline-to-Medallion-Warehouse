@@ -40,7 +40,7 @@ with DAG(
     dag_id="met_office_bronze",
     default_args=DEFAULT_ARGS,
     description="Daily Bronze layer processing for Met Office landed data",
-    schedule_interval="@daily",
+    schedule=None,
     start_date=DAG_START_DATE,
     catchup=False,
     tags=["met-office", "bronze"],

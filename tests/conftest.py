@@ -5,7 +5,15 @@ from unittest.mock import MagicMock
 import pytest
 
 ROOT = Path(__file__).parent.parent
-for _p in [str(ROOT), str(ROOT / "dags"), str(ROOT / "common")]:
+for _p in [
+    str(ROOT),
+    str(ROOT / "dags"),
+    str(ROOT / "common"),
+    str(ROOT / "scripts" / "ingestion"),
+    str(ROOT / "scripts" / "bronze"),
+    str(ROOT / "scripts" / "silver"),
+    str(ROOT / "scripts" / "gold"),
+]:
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
@@ -22,6 +30,18 @@ _VARS = {
     "MET_OFFICE_API_KEY": "test-api-key",
 }
 Variable.get = MagicMock(side_effect=lambda key, default=None: _VARS.get(key, default))
+
+
+def pytest_collection_modifyitems(items):
+    """Auto-skip tests that use the `spark` fixture when Java is not available."""
+    import shutil
+
+    if shutil.which("java") is not None:
+        return
+    skip = pytest.mark.skip(reason="Java not found — run Spark tests inside the project Docker container")
+    for item in items:
+        if "spark" in item.fixturenames:
+            item.add_marker(skip)
 
 
 @pytest.fixture(scope="session")

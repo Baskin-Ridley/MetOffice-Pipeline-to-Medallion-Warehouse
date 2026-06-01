@@ -38,7 +38,7 @@ with DAG(
     dag_id="met_office_api_ingestion",
     default_args=DEFAULT_ARGS,
     description="Daily Met Office API ingestion to the landed data layer",
-    schedule_interval=None,
+    schedule=None,
     start_date=DAG_START_DATE,
     catchup=False,
     tags=["met-office", "ingestion"],

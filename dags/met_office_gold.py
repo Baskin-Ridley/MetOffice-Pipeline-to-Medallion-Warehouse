@@ -43,7 +43,7 @@ with DAG(
     dag_id="met_office_gold",
     default_args=DEFAULT_ARGS,
     description="Daily Gold layer processing for Met Office Silver data",
-    schedule_interval="@daily",
+    schedule=None,
     start_date=DAG_START_DATE,
     catchup=False,
     tags=["met-office", "gold"],
