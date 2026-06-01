@@ -2,7 +2,7 @@ import sys
 from datetime import datetime, timedelta
 from airflow import DAG
 from airflow.configuration import conf
-from airflow.operators.python import PythonOperator
+from airflow.operators.python import BranchPythonOperator, PythonOperator
 
 DAGS_GCS_PATH = conf.get("core", "dags_folder").rstrip("/")
 if DAGS_GCS_PATH not in sys.path:
@@ -20,6 +20,18 @@ DEFAULT_ARGS = {
     "retry_delay": timedelta(minutes=10),
 }
 
+
+def determine_ingestion_branch(**context):
+    """Checks if a specific run mode was requested by the caller pipeline."""
+    run_mode = context["dag_run"].conf.get("run_mode", "all")
+
+    if run_mode == "observations":
+        return "ingest_met_office_observations"
+    elif run_mode == "metadata_only":
+        return "ingest_met_office_metadata"
+    return ["ingest_met_office_metadata", "ingest_met_office_observations"]
+
+
 with DAG(
     dag_id="met_office_api_ingestion",
     default_args=DEFAULT_ARGS,
@@ -29,6 +41,11 @@ with DAG(
     catchup=False,
     tags=["met-office", "ingestion"],
 ) as dag:
+
+    check_run_mode = BranchPythonOperator(
+        task_id="check_run_mode",
+        python_callable=determine_ingestion_branch,
+    )
 
     ingest_metadata = PythonOperator(
         task_id="ingest_met_office_metadata",
@@ -40,4 +57,4 @@ with DAG(
         python_callable=ingest_observations_main,
     )
 
-    ingest_metadata >> ingest_observations
+    check_run_mode >> [ingest_metadata, ingest_observations]

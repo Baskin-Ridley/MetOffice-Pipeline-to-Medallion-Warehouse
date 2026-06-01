@@ -47,6 +47,7 @@ with DAG(
     trigger_ingestion_layer = TriggerDagRunOperator(
         task_id="trigger_met_office_api_ingestion",
         trigger_dag_id="met_office_api_ingestion",
+        conf={"run_mode": "metadata_only"},
         wait_for_completion=True,
         reset_dag_run=True,
     )
@@ -77,4 +78,46 @@ with DAG(
         reset_dag_run=True,
     )
 
-    debug_check >> trigger_ingestion_layer >> trigger_bronze_layer >> trigger_silver_layer
+    trigger_observations_ingestion = TriggerDagRunOperator(
+        task_id="trigger_met_office_observations_ingestion",
+        trigger_dag_id="met_office_api_ingestion",
+        conf={"run_mode": "observations"},
+        wait_for_completion=True,
+        reset_dag_run=True,
+    )
+
+    trigger_bronze_observations = TriggerDagRunOperator(
+        task_id="trigger_met_office_bronze_observations",
+        trigger_dag_id="met_office_bronze",
+        conf={
+            "run_mode": "observations",
+            "gcs_dags_path": GCS_DAGS_PATH,
+            "datalake_bucket": DATALAKE_BUCKET,
+            "spark_jars_packages": "io.delta:delta-spark_2.13:3.1.0",
+        },
+        wait_for_completion=True,
+        reset_dag_run=True,
+    )
+
+    trigger_silver_observations = TriggerDagRunOperator(
+        task_id="trigger_met_office_silver_observations",
+        trigger_dag_id="met_office_silver",
+        conf={
+            "run_mode": "observations",
+            "gcs_dags_path": GCS_DAGS_PATH,
+            "datalake_bucket": DATALAKE_BUCKET,
+            "spark_jars_packages": "io.delta:delta-spark_2.13:3.1.0",
+        },
+        wait_for_completion=True,
+        reset_dag_run=True,
+    )
+
+    (
+        debug_check
+        >> trigger_ingestion_layer
+        >> trigger_bronze_layer
+        >> trigger_silver_layer
+        >> trigger_observations_ingestion
+        >> trigger_bronze_observations
+        >> trigger_silver_observations
+    )

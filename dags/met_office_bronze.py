@@ -76,6 +76,7 @@ with DAG(
             "pyspark_batch": {
                 "main_python_file_uri": "{{ params.gcs_dags_path }}/scripts/bronze/load_met_office_land_observations_to_bronze.py",
                 "python_file_uris": ["{{ params.gcs_dags_path }}/common/file_utils.py"],
+                "args": ["{{ params.datalake_bucket }}"],
             },
             "runtime_config": {
                 "properties": {

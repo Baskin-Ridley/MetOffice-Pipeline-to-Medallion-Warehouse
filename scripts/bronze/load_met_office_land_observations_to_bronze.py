@@ -1,63 +1,55 @@
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import current_timestamp, date_format, from_utc_timestamp, input_file_name, regexp_replace, regexp_extract, lit, sha2, concat_ws, explode, col
+import sys
 import uuid
-from upath import UPath
-from common.file_utils import get_latest_version_paths
-import os
-from airflow.models import Variable
+from urllib.parse import urlparse
+from google.cloud import storage
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import (
+    current_timestamp, date_format, from_utc_timestamp,
+    input_file_name, regexp_replace, lit, sha2, concat_ws, explode, col
+)
+from file_utils import get_latest_version_paths
 
-# Base directory
-BUCKET_NAME = Variable.get("datalake_bucket", "your-gcp-datalake-bucket")
-DATALAKE_ROOT = UPath(f"gs://{BUCKET_NAME}")
 
-BRONZE_DIR = DATALAKE_ROOT / "bronze/met_office/station_observation_land"
-LANDED_BASE_DIR = DATALAKE_ROOT / "landed/met_office/station_observation_land"
+def gcs_prefix_exists(gcs_uri: str) -> bool:
+    parsed = urlparse(gcs_uri)
+    bucket_name = parsed.netloc
+    prefix = parsed.path.lstrip("/")
+
+    if prefix and not prefix.endswith("/"):
+        prefix += "/"
+
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blobs = list(bucket.list_blobs(prefix=prefix, max_results=1))
+    return len(blobs) > 0
+
+
 def main():
-#schema
-# {
-#   "type": "array",
-#   "items": {
-#     "type": "object",
-#     "properties": {
-#       "station_geohash": { "type": "string" },
-#       "extracted_at": { "type": "string" },
-#       "data": {
-#         "type": "array",
-#         "items": {
-#           "type": "object",
-#           "properties": {
-#             "datetime": { "type": "string", "format": "date-time" },
-#             "visibility": { "type": ["integer", "null"] },
-#             "temperature": { "type": ["number", "null"] },
-#             "mslp": { "type": ["integer", "null"] },
-#             "wind_gust": { "type": ["number", "null"] },
-#             "wind_direction": { "type": ["string", "null"] },
-#             "wind_speed": { "type": ["number", "null"] },
-#             "humidity": { "type": ["integer", "null"] },
-#             "weather_code": { "type": ["integer", "null"] },
-#             "pressure_tendency": { "type": ["string", "null"] }
-#           }
-#         }
-#       }
-#     }
-#   }
-# }
+    if len(sys.argv) < 2:
+        raise ValueError("Missing required datalake bucket argument.")
 
-    print("connecting to spark...")
+    BUCKET_NAME = sys.argv[1]
+    DATALAKE_ROOT = f"gs://{BUCKET_NAME}"
+
+    BRONZE_DIR = f"{DATALAKE_ROOT}/bronze/met_office/station_observation_land"
+    LANDED_BASE_DIR = f"{DATALAKE_ROOT}/landed/met_office/station_observation_land"
+
+    print("Connecting to Spark...")
     spark = SparkSession.builder \
-        .remote("sc://spark:15002") \
         .appName("MetOffice Land Observations landed to bronze") \
+        .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
+        .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
         .getOrCreate()
-    
+
     landed_pattern, version_id, output_path = get_latest_version_paths(
-            LANDED_BASE_DIR, 
-            BRONZE_DIR
-        )
-    
+        LANDED_BASE_DIR,
+        BRONZE_DIR
+    )
+
     df = (
         spark.read
         .option("multiline", "true")
-        .json(str(landed_pattern))
+        .json(landed_pattern)
     )
 
     df_exploded = df.withColumn("observation", explode(col("data"))) \
@@ -68,23 +60,22 @@ def main():
         )
 
     incremental_keys = ["station_geohash", "datetime"]
-
     extraction_id = str(uuid.uuid4())
-    
+
     df_bronze = df_exploded \
         .withColumn("_source_file", regexp_replace(input_file_name(), "%20", " ")) \
-        .withColumn("_processed_at", 
+        .withColumn("_processed_at",
             date_format(
-                from_utc_timestamp(current_timestamp(), "Europe/London"), 
+                from_utc_timestamp(current_timestamp(), "Europe/London"),
                 "yyyy-MM-dd'T'HH:mm:ssXXX"
             )
         ) \
         .withColumn("_extraction_id", lit(extraction_id)) \
         .withColumn("_row_hash", sha2(concat_ws("||", *df_exploded.columns), 256))
 
-    if BRONZE_DIR.exists():
+    if gcs_prefix_exists(BRONZE_DIR):
         try:
-            df_existing = spark.read.format("delta").load(str(BRONZE_DIR))
+            df_existing = spark.read.format("delta").load(BRONZE_DIR)
             df_bronze = df_bronze.join(df_existing, on=incremental_keys, how="left_anti")
         except Exception:
             pass
@@ -95,13 +86,14 @@ def main():
         df_bronze.write.format("delta") \
             .mode("append") \
             .option("mergeSchema", "true") \
-            .save(str(BRONZE_DIR))
+            .save(BRONZE_DIR)
         print(f"Moved to bronze. Version {version_id} created.")
     else:
         print("No new observations found. Skipping write.")
-    
+
     df_bronze.printSchema()
     spark.stop()
+
 
 if __name__ == "__main__":
     main()
