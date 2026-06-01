@@ -120,6 +120,23 @@ services:
       - silver-vol:/opt/airflow/silver
       - gold-vol:/opt/airflow/gold
       - ./keys:/opt/airflow/keys
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    user: root
+    environment:
+      - PYTHONPATH=/opt/airflow
+      - GCS_BUCKET=test-bucket
+      - GCP_REGION=europe-west2
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./scripts:/opt/airflow/scripts
+      - ./common:/opt/airflow/common
+      - ./tests:/opt/airflow/tests
+      - ./seeds:/opt/airflow/seeds
+    command: python -m pytest tests/ -v
+
 volumes:
   landed-vol:
   bronze-vol:

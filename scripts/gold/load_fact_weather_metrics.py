@@ -20,17 +20,25 @@ def transform_to_gold(df):
         ) as (MetricName, RawValue, Unit)
     """
 
-    return df.select(
+    df_unpivoted = df.select(
         trim(col("station_geohash").cast("string")).alias("StationKey"),
         date_format(col("observation_datetime"), "yyyyMMdd").cast("int").alias("DateKey"),
         col("observation_datetime").cast("timestamp").cast("string").substr(12, 8).alias("ObservationTime"),
         expr(unpivot_expr),
+    )
+
+    return df_unpivoted.select(
+        col("StationKey"),
+        col("DateKey"),
+        col("ObservationTime"),
+        col("MetricName"),
+        col("Unit"),
         expr("try_cast(RawValue as double)").alias("ValueNumeric"),
         when(expr("try_cast(RawValue as double)").isNull(), col("RawValue")).alias("ValueString"),
         current_timestamp().alias("ProcessedAt"),
-        sha2(concat_ws("||", col("station_geohash"), col("observation_datetime"), col("MetricName")), 256).alias("RowHash"),
+        sha2(concat_ws("||", col("StationKey"), col("DateKey"), col("MetricName")), 256).alias("RowHash"),
         lit("met_office").alias("SourceSystem")
-    ).drop("RawValue")
+    )
 
 
 def main():
