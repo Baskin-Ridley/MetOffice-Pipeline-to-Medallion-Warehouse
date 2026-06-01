@@ -1,8 +1,11 @@
+import logging
 import posixpath
 from typing import Tuple
 from urllib.parse import urlparse
 from google.cloud import storage
 from pyspark.sql import SparkSession
+
+logger = logging.getLogger(__name__)
 
 def get_latest_version_paths(base_dir: str, target_dir: str) -> Tuple[str, str, str]:
     """
@@ -52,11 +55,11 @@ def get_latest_version_paths(base_dir: str, target_dir: str) -> Tuple[str, str, 
     return landed_pattern, version_id, output_path
 
 def start_spark_session(app_name: str) -> SparkSession:
-    print("Connecting to Spark...")
+    logger.info("Connecting to Spark...")
     spark = SparkSession.builder \
         .appName(app_name) \
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
         .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
         .getOrCreate()
-    print("Connected to Spark")
+    logger.info("Connected to Spark")
     return spark
