@@ -49,7 +49,8 @@ with DAG(
         trigger_dag_id="met_office_api_ingestion",
         conf={"run_mode": "metadata_only"},
         wait_for_completion=True,
-        reset_dag_run=True,
+        reset_dag_run=False,
+        poke_interval=15,
     )
 
     trigger_bronze_layer = TriggerDagRunOperator(
@@ -83,7 +84,8 @@ with DAG(
         trigger_dag_id="met_office_api_ingestion",
         conf={"run_mode": "observations"},
         wait_for_completion=True,
-        reset_dag_run=True,
+        reset_dag_run=False,
+        poke_interval=15,
     )
 
     trigger_bronze_observations = TriggerDagRunOperator(
