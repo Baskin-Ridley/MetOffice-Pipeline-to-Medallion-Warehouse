@@ -9,6 +9,10 @@ from airflow.providers.google.cloud.operators.dataproc import DataprocCreateBatc
 GCS_BUCKET = os.environ.get("GCS_BUCKET")
 DAGS_GCS_PATH = f"gs://{GCS_BUCKET}/dags"
 DATALAKE_BUCKET = Variable.get("datalake_bucket")
+SPARK_JARS_PACKAGES = Variable.get("spark_jars_packages", "io.delta:delta-spark_2.13:3.1.0")
+GCP_REGION = os.environ.get("GCP_REGION", "europe-west2")
+
+DAG_START_DATE = datetime(2026, 5, 23)
 
 DEFAULT_ARGS = {
     "owner": "airflow",
@@ -18,7 +22,7 @@ DEFAULT_ARGS = {
     "retries": 1,
     "retry_delay": timedelta(minutes=10),
     "project_id": "noaa-medallion-warehouse",
-    "region": "europe-west2",
+    "region": GCP_REGION,
 }
 
 
@@ -38,13 +42,13 @@ with DAG(
     default_args=DEFAULT_ARGS,
     description="Daily Gold layer processing for Met Office Silver data",
     schedule_interval="@daily",
-    start_date=datetime(2026, 5, 23),
+    start_date=DAG_START_DATE,
     catchup=False,
     tags=["met-office", "gold"],
     params={
         "gcs_dags_path": DAGS_GCS_PATH,
         "datalake_bucket": DATALAKE_BUCKET,
-        "spark_jars_packages": "io.delta:delta-spark_2.13:3.1.0",
+        "spark_jars_packages": SPARK_JARS_PACKAGES,
     },
 ) as dag:
 

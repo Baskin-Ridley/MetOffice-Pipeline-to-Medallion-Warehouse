@@ -1,3 +1,4 @@
+import logging
 import sys
 import uuid
 from urllib.parse import urlparse
@@ -8,6 +9,8 @@ from pyspark.sql.functions import (
     input_file_name, regexp_replace, lit, sha2, concat_ws, explode, col
 )
 from file_utils import get_latest_version_paths
+
+logger = logging.getLogger(__name__)
 
 
 def gcs_prefix_exists(gcs_uri: str) -> bool:
@@ -34,7 +37,7 @@ def main():
     BRONZE_DIR = f"{DATALAKE_ROOT}/bronze/met_office/station_observation_land"
     LANDED_BASE_DIR = f"{DATALAKE_ROOT}/landed/met_office/station_observation_land"
 
-    print("Connecting to Spark...")
+    logger.info("Connecting to Spark...")
     spark = SparkSession.builder \
         .appName("MetOffice Land Observations landed to bronze") \
         .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
@@ -77,21 +80,20 @@ def main():
         try:
             df_existing = spark.read.format("delta").load(BRONZE_DIR)
             df_bronze = df_bronze.join(df_existing, on=incremental_keys, how="left_anti")
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning("Could not read existing bronze table for deduplication: %s", e)
 
     new_records_count = df_bronze.count()
     if new_records_count > 0:
-        print(f"Writing {new_records_count} new records to: {output_path}")
+        logger.info("Writing %d new records to: %s", new_records_count, output_path)
         df_bronze.write.format("delta") \
             .mode("append") \
             .option("mergeSchema", "true") \
             .save(BRONZE_DIR)
-        print(f"Moved to bronze. Version {version_id} created.")
+        logger.info("Moved to bronze. Version %s created.", version_id)
     else:
-        print("No new observations found. Skipping write.")
+        logger.info("No new observations found. Skipping write.")
 
-    df_bronze.printSchema()
     spark.stop()
 
 

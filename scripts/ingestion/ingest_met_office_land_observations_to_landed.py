@@ -1,45 +1,44 @@
-import os
+import logging
 import requests
 import json
-import time # Fixed import from 'from datetime import datetime, time' to avoid conflict
+import time
 from datetime import datetime
-from google.cloud import storage
 from dotenv import load_dotenv
-from deltalake import DeltaTable
 import polars as pl
 from upath import UPath
 from airflow.models import Variable
 
-# configure
 load_dotenv()
+
+logger = logging.getLogger(__name__)
+
 BUCKET_NAME = Variable.get("datalake_bucket", "your-gcp-datalake-bucket")
 DATALAKE_ROOT = UPath(f"gs://{BUCKET_NAME}")
 LANDED_DIR = DATALAKE_ROOT / "landed/met_office/station_observation_land"
 METADATA_DIR = DATALAKE_ROOT / "silver/met_office/station_metadata"
-#API_KEY = open(os.getenv("MET_OFFICE_API_KEY_PATH")).read().strip()
-#API_KEY = os.getenv("MET_OFFICE_API_KEY")
 
 BASE_URL = "https://data.hub.api.metoffice.gov.uk/observation-land/1/"
 
+
 def fetch_met_office_data(geohash: str) -> dict:
     API_KEY = Variable.get("MET_OFFICE_API_KEY")
-    HEADERS = {"apikey": API_KEY} # met office expects key to be in header
-    
+    HEADERS = {"apikey": API_KEY}
+
     url = f"{BASE_URL}{geohash}"
     try:
         response = requests.get(url, headers=HEADERS)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        print(f"Error for geohash {geohash}: {e}")
+        logger.error("Error for geohash %s: %s", geohash, e)
         return None
 
+
 def main():
-    # Load geohashes from Silver metadata table
     try:
         geohashes = pl.read_delta(str(METADATA_DIR)).get_column("station_geohash").unique().to_list()
     except Exception as e:
-        print(f"Failed to load silver metadata: {e}")
+        logger.error("Failed to load silver metadata: %s", e)
         return
 
     run_timestamp = datetime.now().astimezone().strftime("%Y%m%d_%H%M%S%z")
@@ -54,17 +53,19 @@ def main():
             record = {
                 'station_geohash': geohash,
                 'extracted_at': run_timestamp,
-                'data': raw_response  
+                'data': raw_response
             }
             all_data.append(record)
-            
-            time.sleep(0.5) 
+
+            time.sleep(0.5)
 
     if all_data:
         file_path = target_dir / "observations_batch.json"
         file_path.parent.mkdir(parents=True, exist_ok=True)
         with file_path.open("w") as f:
             json.dump(all_data, f, indent=4)
-        print(f"Saved {len(all_data)} records to {file_path}")
+        logger.info("Saved %d records to %s", len(all_data), file_path)
+
+
 if __name__ == "__main__":
     main()

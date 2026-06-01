@@ -1,6 +1,9 @@
+import logging
 import sys
 from pyspark.sql.functions import col, lit, current_timestamp
 from file_utils import start_spark_session
+
+logger = logging.getLogger(__name__)
 
 
 def main():
@@ -59,14 +62,13 @@ def main():
             """)
             df_changed.write.format("delta").mode("append").save(GOLD_DIR)
         else:
-            print("No station metadata changes detected; skipping gold append.")
+            logger.info("No station metadata changes detected; skipping gold append.")
 
-    except Exception:
-        print("Table not found. Performing initial load...")
+    except Exception as e:
+        logger.info("Table not found, performing initial load: %s", e)
         df_gold.write.format("delta").mode("overwrite").save(GOLD_DIR)
 
-    print(f"DimWeatherStations written to {GOLD_DIR}. Schema:")
-    df_gold.printSchema()
+    logger.info("DimWeatherStations written to %s.", GOLD_DIR)
     spark.stop()
 
 

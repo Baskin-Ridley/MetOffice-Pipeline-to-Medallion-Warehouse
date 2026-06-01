@@ -32,12 +32,14 @@ def determine_ingestion_branch(**context):
     return ["ingest_met_office_metadata", "ingest_met_office_observations"]
 
 
+DAG_START_DATE = datetime(2026, 5, 23)
+
 with DAG(
     dag_id="met_office_api_ingestion",
     default_args=DEFAULT_ARGS,
     description="Daily Met Office API ingestion to the landed data layer",
     schedule_interval=None,
-    start_date=datetime(2026, 5, 23),
+    start_date=DAG_START_DATE,
     catchup=False,
     tags=["met-office", "ingestion"],
 ) as dag:

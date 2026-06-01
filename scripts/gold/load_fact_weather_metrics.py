@@ -1,6 +1,9 @@
+import logging
 import sys
 from pyspark.sql.functions import expr, trim, col, current_timestamp, lit, sha2, concat_ws, when, date_format
 from file_utils import start_spark_session
+
+logger = logging.getLogger(__name__)
 
 
 def transform_to_gold(df):
@@ -17,7 +20,7 @@ def transform_to_gold(df):
         ) as (MetricName, RawValue, Unit)
     """
 
-    df_gold = df.select(
+    return df.select(
         trim(col("station_geohash").cast("string")).alias("StationKey"),
         date_format(col("observation_datetime"), "yyyyMMdd").cast("int").alias("DateKey"),
         col("observation_datetime").cast("timestamp").cast("string").substr(12, 8).alias("ObservationTime"),
@@ -28,10 +31,6 @@ def transform_to_gold(df):
         sha2(concat_ws("||", col("station_geohash"), col("observation_datetime"), col("MetricName")), 256).alias("RowHash"),
         lit("met_office").alias("SourceSystem")
     ).drop("RawValue")
-
-    print("Transformation to Gold layer complete. Schema:")
-    df_gold.printSchema()
-    return df_gold
 
 
 def main():
@@ -57,7 +56,7 @@ def main():
         .toTable("FactWeatherMetrics")
 
     query.awaitTermination()
-    print("New data successfully written to Gold layer!")
+    logger.info("New data successfully written to Gold layer.")
     spark.stop()
 
 

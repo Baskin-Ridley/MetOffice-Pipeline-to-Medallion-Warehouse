@@ -1,3 +1,4 @@
+import logging
 import sys
 from pyspark.sql.functions import (
     explode, sequence, to_date, col, date_format,
@@ -5,8 +6,10 @@ from pyspark.sql.functions import (
 )
 from file_utils import start_spark_session
 
+logger = logging.getLogger(__name__)
 
-def generate_dim_date(spark, start_date="2020-01-01", end_date="2031-12-31"):
+
+def generate_dim_date(spark, start_date: str, end_date: str):
     df = spark.createDataFrame([(start_date, end_date)], ["start", "end"])
 
     dim_date = df.select(
@@ -37,14 +40,16 @@ def main():
         raise ValueError("Missing required datalake bucket argument.")
 
     BUCKET_NAME = sys.argv[1]
+    start_date = sys.argv[2] if len(sys.argv) > 2 else "2020-01-01"
+    end_date = sys.argv[3] if len(sys.argv) > 3 else "2031-12-31"
     GOLD_DIM_DIR = f"gs://{BUCKET_NAME}/gold/master/dim_date"
 
     spark = start_spark_session("Generate Gold DimDate")
 
-    print("Generating Date Dimension...")
-    df_dim_date = generate_dim_date(spark)
+    logger.info("Generating Date Dimension from %s to %s...", start_date, end_date)
+    df_dim_date = generate_dim_date(spark, start_date, end_date)
 
-    print(f"Writing DimDate to: {GOLD_DIM_DIR}")
+    logger.info("Writing DimDate to: %s", GOLD_DIM_DIR)
     df_dim_date.write.format("delta") \
         .mode("overwrite") \
         .option("mergeSchema", "true") \
@@ -52,8 +57,7 @@ def main():
 
     spark.sql(f"CREATE TABLE IF NOT EXISTS DimDate USING DELTA LOCATION '{GOLD_DIM_DIR}'")
 
-    print("DimDate successfully initialized. Sample output:")
-    df_dim_date.show(5)
+    logger.info("DimDate successfully written to %s.", GOLD_DIM_DIR)
     spark.stop()
 
 

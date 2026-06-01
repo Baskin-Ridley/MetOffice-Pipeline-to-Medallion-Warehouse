@@ -3,19 +3,15 @@ from datetime import datetime, timedelta
 
 from airflow import DAG
 from airflow.models import Variable
-from airflow.operators.python import PythonOperator
 from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 
 GCS_BUCKET = os.environ.get("GCS_BUCKET")
 GCS_DAGS_PATH = f"gs://{GCS_BUCKET}/dags"
 DATALAKE_BUCKET = Variable.get("datalake_bucket")
+SPARK_JARS_PACKAGES = Variable.get("spark_jars_packages", "io.delta:delta-spark_2.13:3.1.0")
+GCP_REGION = os.environ.get("GCP_REGION", "europe-west2")
 
-def log_debug_info():
-    from airflow.configuration import conf
-    dags_path = conf.get("core", "dags_folder").rstrip("/")
-    print(f"--- DEBUG: conf core dags_folder is {dags_path} ---")
-    print(f"--- DEBUG: GCS_BUCKET env var is {os.environ.get('GCS_BUCKET')} ---")
-    print(f"--- DEBUG: Resolved GCS_DAGS_PATH is gs://{os.environ.get('GCS_BUCKET')}/dags ---")
+DAG_START_DATE = datetime(2026, 5, 23)
 
 DEFAULT_ARGS = {
     "owner": "airflow",
@@ -25,7 +21,7 @@ DEFAULT_ARGS = {
     "retries": 1,
     "retry_delay": timedelta(minutes=10),
     "project_id": "noaa-medallion-warehouse",
-    "region": "europe-west2",
+    "region": GCP_REGION,
 }
 
 with DAG(
@@ -33,16 +29,11 @@ with DAG(
     default_args=DEFAULT_ARGS,
     description="Master controller",
     schedule_interval="@daily",
-    start_date=datetime(2026, 5, 23),
+    start_date=DAG_START_DATE,
     catchup=False,
     is_paused_upon_creation=False,
     tags=["met-office", "full-pipeline"],
 ) as dag:
-
-    debug_check = PythonOperator(
-        task_id="debug_environment_paths",
-        python_callable=log_debug_info,
-    )
 
     trigger_ingestion_layer = TriggerDagRunOperator(
         task_id="trigger_met_office_api_ingestion",
@@ -60,7 +51,7 @@ with DAG(
             "run_mode": "metadata_only",
             "gcs_dags_path": GCS_DAGS_PATH,
             "datalake_bucket": DATALAKE_BUCKET,
-            "spark_jars_packages": "io.delta:delta-spark_2.13:3.1.0",
+            "spark_jars_packages": SPARK_JARS_PACKAGES,
         },
         wait_for_completion=True,
         reset_dag_run=True,
@@ -73,7 +64,7 @@ with DAG(
             "run_mode": "metadata_only",
             "gcs_dags_path": GCS_DAGS_PATH,
             "datalake_bucket": DATALAKE_BUCKET,
-            "spark_jars_packages": "io.delta:delta-spark_2.13:3.1.0",
+            "spark_jars_packages": SPARK_JARS_PACKAGES,
         },
         wait_for_completion=True,
         reset_dag_run=True,
@@ -95,7 +86,7 @@ with DAG(
             "run_mode": "observations",
             "gcs_dags_path": GCS_DAGS_PATH,
             "datalake_bucket": DATALAKE_BUCKET,
-            "spark_jars_packages": "io.delta:delta-spark_2.13:3.1.0",
+            "spark_jars_packages": SPARK_JARS_PACKAGES,
         },
         wait_for_completion=True,
         reset_dag_run=True,
@@ -108,7 +99,7 @@ with DAG(
             "run_mode": "observations",
             "gcs_dags_path": GCS_DAGS_PATH,
             "datalake_bucket": DATALAKE_BUCKET,
-            "spark_jars_packages": "io.delta:delta-spark_2.13:3.1.0",
+            "spark_jars_packages": SPARK_JARS_PACKAGES,
         },
         wait_for_completion=True,
         reset_dag_run=True,
@@ -121,15 +112,14 @@ with DAG(
             "run_mode": "all",
             "gcs_dags_path": GCS_DAGS_PATH,
             "datalake_bucket": DATALAKE_BUCKET,
-            "spark_jars_packages": "io.delta:delta-spark_2.13:3.1.0",
+            "spark_jars_packages": SPARK_JARS_PACKAGES,
         },
         wait_for_completion=True,
         reset_dag_run=True,
     )
 
     (
-        debug_check
-        >> trigger_ingestion_layer
+        trigger_ingestion_layer
         >> trigger_bronze_layer
         >> trigger_silver_layer
         >> trigger_observations_ingestion
