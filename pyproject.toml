@@ -22,4 +22,11 @@ dev = [
     "apache-airflow>=3.2.1",
     "apache-airflow-providers-cncf-kubernetes>=10.17.0",
     "apache-airflow-providers-google>=21.3.0",
+    "pytest>=8.0.0",
+    "pytest-mock>=3.14.0",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
