@@ -105,11 +105,37 @@ with DAG(
         reset_dag_run=True,
     )
 
-    trigger_gold_layer = TriggerDagRunOperator(
-        task_id="trigger_met_office_gold",
+    trigger_gold_dim_date = TriggerDagRunOperator(
+        task_id="trigger_met_office_gold_dim_date",
         trigger_dag_id="met_office_gold",
         conf={
-            "run_mode": "all",
+            "run_mode": "dim_date",
+            "gcs_dags_path": GCS_DAGS_PATH,
+            "datalake_bucket": DATALAKE_BUCKET,
+            "spark_jars_packages": SPARK_JARS_PACKAGES,
+        },
+        wait_for_completion=True,
+        reset_dag_run=True,
+    )
+
+    trigger_gold_dim_stations = TriggerDagRunOperator(
+        task_id="trigger_met_office_gold_dim_stations",
+        trigger_dag_id="met_office_gold",
+        conf={
+            "run_mode": "dim_stations",
+            "gcs_dags_path": GCS_DAGS_PATH,
+            "datalake_bucket": DATALAKE_BUCKET,
+            "spark_jars_packages": SPARK_JARS_PACKAGES,
+        },
+        wait_for_completion=True,
+        reset_dag_run=True,
+    )
+
+    trigger_gold_facts = TriggerDagRunOperator(
+        task_id="trigger_met_office_gold_facts",
+        trigger_dag_id="met_office_gold",
+        conf={
+            "run_mode": "facts",
             "gcs_dags_path": GCS_DAGS_PATH,
             "datalake_bucket": DATALAKE_BUCKET,
             "spark_jars_packages": SPARK_JARS_PACKAGES,
@@ -125,5 +151,6 @@ with DAG(
         >> trigger_observations_ingestion
         >> trigger_bronze_observations
         >> trigger_silver_observations
-        >> trigger_gold_layer
+        >> [trigger_gold_dim_date, trigger_gold_dim_stations]
+        >> trigger_gold_facts
     )

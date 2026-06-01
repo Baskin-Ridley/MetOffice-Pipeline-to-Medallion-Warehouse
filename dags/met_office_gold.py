@@ -30,11 +30,13 @@ def determine_gold_branch(**context):
     """Checks if a specific run mode was requested by the caller pipeline."""
     run_mode = context["dag_run"].conf.get("run_mode", "all")
 
-    if run_mode == "dimensions":
-        return ["load_dim_date", "load_dim_weather_stations"]
+    if run_mode == "dim_date":
+        return "load_dim_date"
+    elif run_mode == "dim_stations":
+        return "load_dim_weather_stations"
     elif run_mode == "facts":
         return "load_fact_weather_metrics"
-    return ["load_dim_date", "load_dim_weather_stations"]
+    return ["load_dim_date", "load_dim_weather_stations", "load_fact_weather_metrics"]
 
 
 with DAG(
@@ -108,4 +110,4 @@ with DAG(
         },
     )
 
-    check_run_mode >> [dim_date, dim_weather_stations] >> fact_weather_metrics
+    check_run_mode >> [dim_date, dim_weather_stations, fact_weather_metrics]
