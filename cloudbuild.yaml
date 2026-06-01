@@ -19,6 +19,11 @@ steps:
         terraform import -input=false -var="project_id=${PROJECT_ID}" -var="project_number=${PROJECT_NUMBER}" -var="region=${_REGION}" -var="environment=gcp" 'google_storage_bucket.datalake[0]' ${PROJECT_ID}-met-office-datalake || true
         terraform import -input=false -var="project_id=${PROJECT_ID}" -var="project_number=${PROJECT_NUMBER}" -var="region=${_REGION}" -var="environment=gcp" 'google_bigquery_dataset.warehouse[0]' ${PROJECT_ID}/noaa_medallion_warehouse || true
         terraform import -input=false -var="project_id=${PROJECT_ID}" -var="project_number=${PROJECT_NUMBER}" -var="region=${_REGION}" -var="environment=gcp" 'google_composer_environment.composer[0]' projects/${PROJECT_ID}/locations/${_REGION}/environments/${PROJECT_ID}-composer || true
+        terraform import -input=false -var="project_id=${PROJECT_ID}" -var="project_number=${PROJECT_NUMBER}" -var="region=${_REGION}" -var="environment=gcp" 'google_service_account.composer_scheduler[0]' projects/${PROJECT_ID}/serviceAccounts/composer-scheduler@${PROJECT_ID}.iam.gserviceaccount.com || true
+        terraform import -input=false -var="project_id=${PROJECT_ID}" -var="project_number=${PROJECT_NUMBER}" -var="region=${_REGION}" -var="environment=gcp" 'google_cloud_run_v2_job.composer_pause[0]' projects/${PROJECT_ID}/locations/${_REGION}/jobs/composer-pause || true
+        terraform import -input=false -var="project_id=${PROJECT_ID}" -var="project_number=${PROJECT_NUMBER}" -var="region=${_REGION}" -var="environment=gcp" 'google_cloud_run_v2_job.composer_resume[0]' projects/${PROJECT_ID}/locations/${_REGION}/jobs/composer-resume || true
+        terraform import -input=false -var="project_id=${PROJECT_ID}" -var="project_number=${PROJECT_NUMBER}" -var="region=${_REGION}" -var="environment=gcp" 'google_cloud_scheduler_job.composer_pause[0]' projects/${PROJECT_ID}/locations/${_REGION}/jobs/composer-daily-pause || true
+        terraform import -input=false -var="project_id=${PROJECT_ID}" -var="project_number=${PROJECT_NUMBER}" -var="region=${_REGION}" -var="environment=gcp" 'google_cloud_scheduler_job.composer_resume[0]' projects/${PROJECT_ID}/locations/${_REGION}/jobs/composer-daily-resume || true
 
   - name: 'hashicorp/terraform:1.5.7'
     id: 'terraform-apply'
