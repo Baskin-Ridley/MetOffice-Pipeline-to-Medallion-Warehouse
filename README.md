@@ -70,51 +70,57 @@ The metadata layer runs first because the observations ingestion uses the silver
 
 ## Data Model (Gold Layer)
 
-The gold layer is a star schema optimised for analytical queries.
+A star schema optimised for analytical queries. `FactWeatherMetrics` uses an unpivoted (EAV) structure — each observation is expanded into one row per metric — keeping the schema stable as measurement types change over time. `DimWeatherStations` is maintained as SCD Type 2, preserving the full history of any station attribute changes.
 
-### `DimWeatherStations` — SCD Type 2
+```mermaid
+erDiagram
+    DimDate {
+        int     DateKey         PK  "YYYYMMDD"
+        date    FullDate
+        int     Year
+        int     Month
+        int     Day
+        string  MonthName
+        string  DayName
+        int     Quarter
+        bool    IsWeekend
+        string  Season
+    }
 
-| Column | Type | Notes |
-|---|---|---|
-| StationKey | string | Geohash, natural + surrogate key |
-| StationName | string | |
-| Latitude / Longitude | double | |
-| County | string | |
-| Country / CountryCode | string | |
-| StationType | string | Automatic or Manual |
-| RegionCode | string | |
-| TimeZone | string | Olson format |
-| EffStartDate / EffEndDate | timestamp | SCD Type 2 validity window |
-| IsCurrent | boolean | |
-| RowHash | string | SHA-256 of business columns for change detection |
+    DimWeatherStations {
+        string      StationKey      PK  "Geohash"
+        string      StationName
+        double      Latitude
+        double      Longitude
+        string      County
+        string      Country
+        string      CountryCode
+        string      StationType         "Automatic or Manual"
+        string      RegionCode
+        string      TimeZone            "Olson format"
+        timestamp   EffStartDate        "SCD Type 2"
+        timestamp   EffEndDate          "SCD Type 2"
+        bool        IsCurrent
+        string      RowHash             "SHA-256 change detection"
+        string      SourceSystem
+    }
 
-### `DimDate`
+    FactWeatherMetrics {
+        string      StationKey      FK
+        int         DateKey         FK
+        string      ObservationTime     "HH:mm:ss"
+        string      MetricName          "e.g. Temperature, Wind Speed"
+        string      Unit                "e.g. C, m/s, hPa"
+        double      ValueNumeric        "Quantitative metrics"
+        string      ValueString         "Categorical metrics e.g. wind direction"
+        timestamp   ProcessedAt
+        string      RowHash
+        string      SourceSystem
+    }
 
-| Column | Type | Notes |
-|---|---|---|
-| DateKey | int | YYYYMMDD, joins to FactWeatherMetrics |
-| FullDate | date | |
-| Year / Month / Day | int | |
-| MonthName / DayName | string | |
-| Quarter | int | |
-| IsWeekend | boolean | |
-| Season | string | Spring / Summer / Autumn / Winter |
-
-### `FactWeatherMetrics` — Unpivoted (EAV)
-
-Each observation row is unpivoted into 8 metric rows, one per measured phenomenon.
-
-| Column | Type | Notes |
-|---|---|---|
-| StationKey | string | FK → DimWeatherStations |
-| DateKey | int | FK → DimDate |
-| ObservationTime | string | HH:mm:ss |
-| MetricName | string | e.g. Temperature, Wind Speed |
-| Unit | string | e.g. C, m/s, hPa |
-| ValueNumeric | double | Populated for quantitative metrics |
-| ValueString | string | Populated for categorical metrics (e.g. wind direction) |
-| RowHash | string | SHA-256 for deduplication |
-| SourceSystem | string | `met_office` |
+    DimDate            ||--o{ FactWeatherMetrics : "DateKey"
+    DimWeatherStations ||--o{ FactWeatherMetrics : "StationKey"
+```
 
 ---
 
