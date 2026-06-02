@@ -168,15 +168,17 @@ erDiagram
 
 ## Key Engineering Decisions
 
-**Delta Lake throughout** — chosen over raw Parquet for ACID guarantees, schema evolution, and the `availableNow` streaming trigger, which gives micro-batch semantics without a continuously running Spark job.
+**Cloud-first from the ground up** — a deliberate choice to build entirely on managed cloud services rather than self-hosted infrastructure. Every component — orchestration, compute, storage, secrets — is provisioned and operated by GCP. This removes the overhead of managing infrastructure and aligns with how modern data teams actually operate: ephemeral Dataproc Serverless batches spin up only when needed, Composer handles scheduling without a scheduler VM to babysit, and Terraform ensures the whole environment is reproducible from scratch. Building cloud-first was as much about learning the pattern as it was about the practicalities of this project.
+
+**Delta Lake throughout** — having worked with Delta Lake at Coca-Cola, it was a natural choice and honestly a pleasure to use again. Strictly speaking it is overkill for a pipeline of this scale — raw Parquet would have done the job — but Delta's ACID guarantees, schema evolution, and native `MERGE` support make the code cleaner and the pipeline more robust than it would otherwise be. The `availableNow` streaming trigger is a particular highlight: it gives micro-batch semantics — processing only new data since the last checkpoint — without a continuously running Spark job, which matters for cost on a serverless compute model.
 
 **Incremental bronze writes via left-anti join** — each bronze run reads the existing Delta table and filters out already-ingested records by composite key (`station_geohash + datetime`), making runs idempotent without a full overwrite.
 
-**SCD Type 2 on DimWeatherStations** — station metadata (coordinates, region, type) can change. Rather than overwriting, the gold load detects changes via row hash comparison and closes old records before appending new ones, preserving history for point-in-time analysis.
+**SCD Type 2 on DimWeatherStations** — station attributes (coordinates, region, classification) can be corrected or updated by the Met Office. No such change occurred during this project, but the cost of not designing for it is a silent overwrite that destroys history. Detecting changes via row hash comparison and closing superseded records before appending new ones means the dimension is always ready for point-in-time analysis, whether that need arises today or a year from now.
 
-**Unpivoted fact table** — weather observations contain a mix of numeric and categorical metrics. An EAV model in `FactWeatherMetrics` keeps the schema stable as the Met Office adds or removes measurement types, at the cost of more rows per observation.
+**Unpivoted fact table** — weather stations don't all report the same measurements: sensor capability varies by station type, and the Met Office periodically adds or retires metrics. An EAV model in `FactWeatherMetrics` means a station that doesn't report a given metric simply has no row for it, rather than a sea of NULL columns. New metric types can appear in the data without any schema migration, and downstream queries become metric-agnostic — filtering by `MetricName` rather than selecting a specific column.
 
-**BranchPythonOperator for run-mode routing** — sub-DAGs accept a `run_mode` config parameter (`metadata_only`, `observations`, `all`) so the master pipeline can trigger partial runs without duplicating DAG logic.
+**Master pipeline DAG for maintainability** — rather than one monolithic DAG, each layer (ingestion, bronze, silver, gold) is its own independently triggerable DAG. The master DAG chains them via `TriggerDagRunOperator`, passing a `run_mode` parameter that drives a `BranchPythonOperator` in each sub-DAG. This means any layer can be re-run in isolation without re-triggering the whole pipeline, and adding a new data source in future means adding a new sub-DAG rather than modifying a single growing file.
 
 ---
 
