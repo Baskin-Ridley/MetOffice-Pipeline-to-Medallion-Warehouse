@@ -134,7 +134,7 @@ resource "google_secret_manager_secret" "met_office_api_key" {
 resource "google_secret_manager_secret_iam_member" "composer_secret_accessor" {
   count     = var.environment == "gcp" ? 1 : 0
   project   = var.project_id
-  secret_id = "airflow-variables-MET_OFFICE_API_KEY"
+  secret_id = google_secret_manager_secret.met_office_api_key[0].secret_id
   role      = "roles/secretmanager.secretAccessor"
   member    = "serviceAccount:${var.project_number}-compute@developer.gserviceaccount.com"
 }
@@ -170,6 +170,8 @@ resource "google_bigquery_table" "dim_date" {
     connection_id = google_bigquery_connection.biglake[0].name
     autodetect    = true
   }
+
+  depends_on = [google_storage_bucket_iam_member.biglake_storage_viewer]
 }
 
 resource "google_bigquery_table" "dim_weather_stations" {
@@ -184,6 +186,8 @@ resource "google_bigquery_table" "dim_weather_stations" {
     connection_id = google_bigquery_connection.biglake[0].name
     autodetect    = true
   }
+
+  depends_on = [google_storage_bucket_iam_member.biglake_storage_viewer]
 }
 
 resource "google_bigquery_table" "fact_weather_metrics" {
@@ -198,24 +202,8 @@ resource "google_bigquery_table" "fact_weather_metrics" {
     connection_id = google_bigquery_connection.biglake[0].name
     autodetect    = true
   }
-}
 
-#=========================================
-# 6. CLOUD BUILD PERMISSIONS
-#=========================================
-resource "google_project_iam_member" "cloudbuild_roles" {
-  for_each = var.environment == "gcp" ? toset([
-    "roles/editor",
-    "roles/composer.admin",
-    "roles/secretmanager.admin",
-    "roles/bigquery.admin",
-  ]) : toset([])
-
-  project = var.project_id
-  role    = each.value
-  member  = "serviceAccount:${var.project_number}@cloudbuild.gserviceaccount.com"
-
-  depends_on = [google_project_service.apis]
+  depends_on = [google_storage_bucket_iam_member.biglake_storage_viewer]
 }
 
 #=========================================
