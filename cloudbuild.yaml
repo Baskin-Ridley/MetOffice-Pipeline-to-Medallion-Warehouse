@@ -6,7 +6,7 @@ steps:
     args:
       - '-c'
       - |
-        terraform init
+        terraform init -reconfigure
 
   - name: 'hashicorp/terraform:1.5.7'
     id: 'terraform-import'

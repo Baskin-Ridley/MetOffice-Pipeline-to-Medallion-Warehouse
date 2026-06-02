@@ -6,6 +6,11 @@ terraform {
       version = "~> 5.0"
     }
   }
+
+  backend "gcs" {
+    bucket = "noaa-medallion-warehouse-met-office-datalake"
+    prefix = "terraform/state"
+  }
 }
 
 provider "google" {
