@@ -75,47 +75,48 @@ A star schema optimised for analytical queries. `FactWeatherMetrics` uses an unp
 ```mermaid
 erDiagram
     DimDate {
-        int     DateKey         PK  "YYYYMMDD"
-        date    FullDate
-        int     Year
-        int     Month
-        int     Day
-        string  MonthName
-        string  DayName
-        int     Quarter
-        bool    IsWeekend
-        string  Season
+        int     DateKey         PK  "YYYYMMDD surrogate key"
+        date    FullDate            "Calendar date"
+        int     Year                "Calendar year e.g. 2024"
+        int     Month               "Month number 1-12"
+        int     Day                 "Day of month 1-31"
+        string  MonthName           "Full month name e.g. January"
+        string  DayName             "Full day name e.g. Monday"
+        int     Quarter             "Quarter number 1-4"
+        bool    IsWeekend           "True if Saturday or Sunday"
+        string  Season              "Spring, Summer, Autumn or Winter"
+        string  SourceSystem        "met_office_calendar"
     }
 
     DimWeatherStations {
-        string      StationKey      PK  "Geohash"
-        string      StationName
-        double      Latitude
-        double      Longitude
-        string      County
-        string      Country
-        string      CountryCode
+        string      StationKey      PK  "Geohash of station coordinates"
+        string      StationName         "Official Met Office station name"
+        double      Latitude            "Decimal degrees"
+        double      Longitude           "Decimal degrees"
+        string      County              "Administrative county"
+        string      Country             "Full country name"
+        string      CountryCode         "ISO country code e.g. GB"
         string      StationType         "Automatic or Manual"
-        string      RegionCode
-        string      TimeZone            "Olson format"
-        timestamp   EffStartDate        "SCD Type 2"
-        timestamp   EffEndDate          "SCD Type 2"
-        bool        IsCurrent
-        string      RowHash             "SHA-256 change detection"
-        string      SourceSystem
+        string      RegionCode          "Met Office region code e.g. SE"
+        string      TimeZone            "Olson timezone e.g. Europe/London"
+        timestamp   EffStartDate        "Timestamp record became active"
+        timestamp   EffEndDate          "Timestamp record was superseded, null if current"
+        bool        IsCurrent           "True if this is the live station record"
+        string      RowHash             "SHA-256 of name, geohash, county, country, timezone, region"
+        string      SourceSystem        "met_office"
     }
 
     FactWeatherMetrics {
-        string      StationKey      FK
-        int         DateKey         FK
-        string      ObservationTime     "HH:mm:ss"
-        string      MetricName          "e.g. Temperature, Wind Speed"
-        string      Unit                "e.g. C, m/s, hPa"
-        double      ValueNumeric        "Quantitative metrics"
-        string      ValueString         "Categorical metrics e.g. wind direction"
-        timestamp   ProcessedAt
-        string      RowHash
-        string      SourceSystem
+        string      StationKey      FK  "FK to DimWeatherStations"
+        int         DateKey         FK  "YYYYMMDD, FK to DimDate"
+        string      ObservationTime     "Time of observation HH:mm:ss"
+        string      MetricName          "Measured phenomenon e.g. Temperature, Wind Speed"
+        string      Unit                "Unit of measurement e.g. C, m/s, hPa"
+        double      ValueNumeric        "Populated for quantitative metrics, null otherwise"
+        string      ValueString         "Populated for categorical metrics e.g. wind direction, null otherwise"
+        timestamp   ProcessedAt         "Timestamp when record was written to gold"
+        string      RowHash             "SHA-256 of StationKey, DateKey and MetricName"
+        string      SourceSystem        "met_office"
     }
 
     DimDate            ||--o{ FactWeatherMetrics : "DateKey"
