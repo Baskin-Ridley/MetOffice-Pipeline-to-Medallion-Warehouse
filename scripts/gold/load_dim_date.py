@@ -31,7 +31,7 @@ def generate_dim_date(spark, start_date: str, end_date: str):
             .when(month(col("FullDate")).isin(3, 4, 5), "Spring")
             .when(month(col("FullDate")).isin(6, 7, 8), "Summer")
             .otherwise("Autumn").alias("Season"),
-        lit("met_office_calendar").alias("SourceSystem")
+        lit("generated_calendar").alias("SourceSystem")
     )
 
 

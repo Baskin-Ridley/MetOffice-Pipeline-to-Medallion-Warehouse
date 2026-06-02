@@ -21,28 +21,33 @@ The pipeline is orchestrated by **Apache Airflow** (Cloud Composer), with heavy 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                          GCP / Cloud Composer                           │
-│                                                                         │
-│  Met Office API                                                         │
-│       │                                                                 │
-│       ▼                                                                 │
-│  ┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────────┐  │
-│  │  Landed  │────▶│  Bronze  │────▶│  Silver  │────▶│     Gold     │  │
-│  │  (JSON)  │     │ (Delta)  │     │ (Delta)  │     │(Delta + BQ)  │  │
-│  └──────────┘     └──────────┘     └──────────┘     └──────┬───────┘  │
-│                                                             │           │
-│                                          ┌──────────────────┤           │
-│                                          ▼                  ▼           │
-│                                   DimWeatherStations  fact_weather_     │
-│                                   DimDate             metrics           │
-│                                                                         │
-│  GCS Data Lake (Delta) ────────────────────────────────────────────── │
-│  BigQuery Warehouse ───────────────────────────────────────────────── │
-│  Orchestration: Cloud Composer (Airflow)                                │
-│  Processing:    Dataproc Serverless (PySpark + Delta Lake)              │
-│  IaC:           Terraform   CI/CD: Cloud Build                         │
-└─────────────────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                            GCP / Cloud Composer                              │
+│                                                                              │
+│   Met Office API                                                             │
+│         │                                                                    │
+│         ▼                                                                    │
+│   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────────────────┐   │
+│   │  Landed  │──▶│  Bronze  │──▶│  Silver  │──▶│         Gold         │   │
+│   │   JSON   │   │  Delta   │   │  Delta   │   │     Delta  +  BQ     │   │
+│   └──────────┘   └──────────┘   └──────────┘   └──────────┬───────────┘   │
+│                                                            │               │
+│                                              ┌─────────────┘               │
+│                                              │                             │
+│                               ┌──────────────┴─────────────┐              │
+│                               │                             │              │
+│                    ┌──────────▼──────────┐   ┌─────────────▼────────────┐ │
+│                    │     Delta (GCS)     │   │         BigQuery         │ │
+│                    ├─────────────────────┤   ├──────────────────────────┤ │
+│                    │ DimDate             │   │ DimDate                  │ │
+│                    │ DimWeatherStations  │   │ DimWeatherStations       │ │
+│                    │ FactWeatherMetrics  │   │ fact_weather_metrics     │ │
+│                    └─────────────────────┘   └──────────────────────────┘ │
+│                                                                            │
+│   Orchestration  Cloud Composer (Airflow)                                  │
+│   Compute        Dataproc Serverless (PySpark + Delta Lake)                │
+│   IaC / CI·CD    Terraform + Cloud Build                                   │
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -86,7 +91,7 @@ erDiagram
         int     Quarter             "Quarter number 1-4"
         bool    IsWeekend           "True if Saturday or Sunday"
         string  Season              "Spring, Summer, Autumn or Winter"
-        string  SourceSystem        "met_office_calendar"
+        string  SourceSystem        "generated_calendar"
     }
 
     DimWeatherStations {
