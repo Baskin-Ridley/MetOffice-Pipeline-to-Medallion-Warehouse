@@ -129,16 +129,16 @@ erDiagram
 
 | Concern | Technology |
 |---|---|
-| Orchestration | Apache Airflow (Cloud Composer 2) |
+| Orchestration | Apache Airflow on Cloud Composer 2 |
 | Transformation | PySpark on Dataproc Serverless |
 | Table format | Delta Lake |
 | Storage | Google Cloud Storage |
-| Warehouse | BigQuery (Gold layer sink) |
+| Warehouse | BigQuery |
 | IaC | Terraform |
 | CI/CD | Google Cloud Build |
-| Ingestion | Python + Polars + `universal-pathlib` |
+| Ingestion | Python + Polars |
 | Secrets | GCP Secret Manager (Airflow secrets backend) |
-| Local dev | Docker Compose + Delta Docker image |
+| Testing | pytest + PySpark |
 
 ---
 
