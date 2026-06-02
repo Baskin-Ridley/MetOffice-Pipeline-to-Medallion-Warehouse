@@ -1,5 +1,5 @@
 def main():
-    print("Hello from noaa-pipeline-to-medallion-warehouse!")
+    print("Hello from met-office-pipeline-to-medallion-warehouse!")
 
 
 if __name__ == "__main__":

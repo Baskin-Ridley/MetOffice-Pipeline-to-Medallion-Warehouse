@@ -1,4 +1,4 @@
-FROM noaa-medallion-pipeline-airflow-common:latest
+FROM met-office-pipeline-airflow-common:latest
 
 USER root
 

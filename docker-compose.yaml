@@ -1,4 +1,4 @@
-name: noaa-medallion-pipeline
+name: met-office-pipeline
 
 services:
   postgres:

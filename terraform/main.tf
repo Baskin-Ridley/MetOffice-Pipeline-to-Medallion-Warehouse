@@ -51,7 +51,7 @@ resource "google_storage_bucket_object" "lake_folders" {
 resource "google_bigquery_dataset" "warehouse" {
   count                      = var.environment == "gcp" ? 1 : 0
   dataset_id                 = "noaa_medallion_warehouse"
-  friendly_name              = "NOAA Medallion Data Warehouse"
+  friendly_name              = "Met Office Medallion Data Warehouse"
   description                = "Houses the Bronze, Silver, and Gold analytical data layers"
   location                   = "EU" 
   delete_contents_on_destroy = true 
