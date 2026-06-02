@@ -166,7 +166,6 @@ erDiagram
 ├── seeds/                  # Station seed CSV (390 UK stations, 10 monitored)
 ├── terraform/              # GCS bucket, BigQuery dataset, Composer environment
 ├── tests/                  # DAG integrity + transform unit tests
-├── docker-compose.yaml     # Local Airflow + Spark environment
 └── cloudbuild.yaml         # CI/CD: terraform apply → deploy DAGs to Composer
 ```
 
