@@ -1,5 +1,5 @@
 [project]
-name = "noaa-pipeline-to-medallion-warehouse"
+name = "met-office-pipeline-to-medallion-warehouse"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"

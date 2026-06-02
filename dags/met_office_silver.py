@@ -21,7 +21,7 @@ DEFAULT_ARGS = {
     "email_on_retry": False,
     "retries": 1,
     "retry_delay": timedelta(minutes=10),
-    "project_id": "noaa-medallion-warehouse",
+    "project_id": "met-office-medallion-warehouse",
     "region": GCP_REGION,
 }
 

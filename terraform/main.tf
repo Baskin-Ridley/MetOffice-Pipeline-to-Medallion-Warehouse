@@ -8,7 +8,7 @@ terraform {
   }
 
   backend "gcs" {
-    bucket = "noaa-medallion-warehouse-met-office-datalake"
+    bucket = "met-office-medallion-warehouse-datalake"
     prefix = "terraform/state"
   }
 }
@@ -27,7 +27,7 @@ locals {
 #=========================================
 resource "google_storage_bucket" "datalake" {
   count         = var.environment == "gcp" ? 1 : 0
-  name          = "${var.project_id}-met-office-datalake"
+  name          = "${var.project_id}-datalake"
   location      = var.region
   force_destroy = true 
 
@@ -50,7 +50,7 @@ resource "google_storage_bucket_object" "lake_folders" {
 #=========================================
 resource "google_bigquery_dataset" "warehouse" {
   count                      = var.environment == "gcp" ? 1 : 0
-  dataset_id                 = "noaa_medallion_warehouse"
+  dataset_id                 = "met_office_medallion_warehouse"
   friendly_name              = "Met Office Medallion Data Warehouse"
   description                = "Houses the Bronze, Silver, and Gold analytical data layers"
   location                   = "EU" 
