@@ -104,6 +104,65 @@ resource "google_secret_manager_secret_iam_member" "composer_secret_accessor" {
 }
 
 #=========================================
+# 5. BIGLAKE CONNECTION + EXTERNAL TABLES
+#=========================================
+resource "google_bigquery_connection" "biglake" {
+  count         = var.environment == "gcp" ? 1 : 0
+  connection_id = "${var.project_id}-biglake"
+  location      = "EU"
+  cloud_resource {}
+}
+
+resource "google_storage_bucket_iam_member" "biglake_storage_viewer" {
+  count  = var.environment == "gcp" ? 1 : 0
+  bucket = google_storage_bucket.datalake[0].name
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${google_bigquery_connection.biglake[0].cloud_resource[0].service_account_id}"
+}
+
+resource "google_bigquery_table" "dim_date" {
+  count               = var.environment == "gcp" ? 1 : 0
+  dataset_id          = google_bigquery_dataset.warehouse[0].dataset_id
+  table_id            = "DimDate"
+  deletion_protection = false
+
+  external_data_configuration {
+    source_uris   = ["gs://${google_storage_bucket.datalake[0].name}/gold/master/dim_date"]
+    source_format = "DELTA_LAKE"
+    connection_id = google_bigquery_connection.biglake[0].name
+    autodetect    = true
+  }
+}
+
+resource "google_bigquery_table" "dim_weather_stations" {
+  count               = var.environment == "gcp" ? 1 : 0
+  dataset_id          = google_bigquery_dataset.warehouse[0].dataset_id
+  table_id            = "DimWeatherStations"
+  deletion_protection = false
+
+  external_data_configuration {
+    source_uris   = ["gs://${google_storage_bucket.datalake[0].name}/gold/weather/dim_weather_stations"]
+    source_format = "DELTA_LAKE"
+    connection_id = google_bigquery_connection.biglake[0].name
+    autodetect    = true
+  }
+}
+
+resource "google_bigquery_table" "fact_weather_metrics" {
+  count               = var.environment == "gcp" ? 1 : 0
+  dataset_id          = google_bigquery_dataset.warehouse[0].dataset_id
+  table_id            = "FactWeatherMetrics"
+  deletion_protection = false
+
+  external_data_configuration {
+    source_uris   = ["gs://${google_storage_bucket.datalake[0].name}/gold/weather/weather_metrics"]
+    source_format = "DELTA_LAKE"
+    connection_id = google_bigquery_connection.biglake[0].name
+    autodetect    = true
+  }
+}
+
+#=========================================
 # OUTPUTS
 #=========================================
 output "data_lake_bucket_name" {
