@@ -12,7 +12,7 @@ This project is my implementation of those architectural skills in code: a produ
 
 ## Project Overview
 
-A fully automated, cloud-native ELT pipeline that ingests live weather observation data from the **UK Met Office API**, processes it through a **medallion architecture** (Landed → Bronze → Silver → Gold), and lands a star-schema analytical layer in **Delta Lake** on GCS.
+A fully automated, cloud-native ELT pipeline that ingests live weather observation data from the **UK Met Office API**, processes it through a **medallion architecture** (Landed → Bronze → Silver → Gold), and surfaces a star-schema analytical layer in **BigQuery**, backed by **Delta Lake** on GCS.
 
 The pipeline is orchestrated by **Apache Airflow** (Cloud Composer), with heavy transformation work offloaded to **Dataproc Serverless PySpark**. Infrastructure is defined in **Terraform** and deployed via a **Cloud Build** CI/CD pipeline on every push to `main`.
 
@@ -29,15 +29,16 @@ The pipeline is orchestrated by **Apache Airflow** (Cloud Composer), with heavy 
 │       ▼                                                                 │
 │  ┌──────────┐     ┌──────────┐     ┌──────────┐     ┌──────────────┐  │
 │  │  Landed  │────▶│  Bronze  │────▶│  Silver  │────▶│     Gold     │  │
-│  │  (JSON)  │     │ (Delta)  │     │ (Delta)  │     │   (Delta)    │  │
+│  │  (JSON)  │     │ (Delta)  │     │ (Delta)  │     │(Delta + BQ)  │  │
 │  └──────────┘     └──────────┘     └──────────┘     └──────┬───────┘  │
 │                                                             │           │
 │                                          ┌──────────────────┤           │
 │                                          ▼                  ▼           │
-│                                   DimWeatherStations  FactWeatherMetrics│
-│                                   DimDate                               │
+│                                   DimWeatherStations  fact_weather_     │
+│                                   DimDate             metrics           │
 │                                                                         │
-│  GCS Data Lake ──────────────────────────────────────────────────────  │
+│  GCS Data Lake (Delta) ────────────────────────────────────────────── │
+│  BigQuery Warehouse ───────────────────────────────────────────────── │
 │  Orchestration: Cloud Composer (Airflow)                                │
 │  Processing:    Dataproc Serverless (PySpark + Delta Lake)              │
 │  IaC:           Terraform   CI/CD: Cloud Build                         │
@@ -186,50 +187,63 @@ erDiagram
 
 ### Prerequisites
 
-- A GCP project with billing enabled
+- A GCP project
 - A [Met Office DataHub](https://datahub.metoffice.gov.uk) API key (free tier available)
 
-### 1 — Enable required APIs
+Terraform handles the hard stuff — APIs, storage, BigQuery, Composer, and secrets are all provisioned automatically. Only three things need a human first.
 
-In the GCP console go to **APIs & Services → Enable APIs** and enable:
-`Cloud Composer`, `Dataproc`, `Cloud Storage`, `BigQuery`, `Secret Manager`, `Cloud Build`.
+---
 
-### 2 — Create the Terraform state bucket
+### 1 — Create the GCP project
 
-Terraform's remote state backend must exist before any build can run. In **Cloud Storage → Create bucket**, create a bucket named `YOUR_PROJECT_ID-met-office-datalake` in your chosen region. This same bucket later becomes the data lake.
+Note the **project ID** shown under the project name — this is used throughout the infrastructure.
 
-### 3 — Store the Met Office API key in Secret Manager
+---
 
-In **Secret Manager → Create secret**, create a secret named exactly:
+### 2 — Grant the Cloud Build service account permissions
 
-```
-airflow-variables-MET_OFFICE_API_KEY
-```
+Terraform runs as the Cloud Build SA and needs elevated permissions to provision IAM bindings, Composer, and Secret Manager. This is a one-time bootstrap step.
 
-Paste your API key as the secret value. Airflow's Secret Manager backend resolves variables using this naming convention automatically.
+In **IAM & Admin → IAM**, grant `YOUR_PROJECT_NUMBER@cloudbuild.gserviceaccount.com` one of:
 
-### 4 — Connect Cloud Build to this repository
+- **Owner** — simplest option
+- Or if you prefer least privilege: **Editor** + **Composer Administrator** + **Secret Manager Admin** + **Project IAM Admin** + **Service Usage Admin**
 
-In **Cloud Build → Triggers → Connect Repository**, link your GitHub account and select this repo. Create a trigger with:
+(The project number is shown on the GCP project dashboard.)
+
+---
+
+### 3 — Connect Cloud Build to this repository
+
+In **Cloud Build → Repositories (2nd gen) → Create host connection**, authorise GCP to access your GitHub account. Once connected, click **Link Repository** and select this repo.
+
+Then in **Cloud Build → Triggers → Create Trigger**:
 
 | Setting | Value |
 |---|---|
-| Event | Push to branch `main` |
-| Configuration | `cloudbuild.yaml` (repo root) |
-| Substitution `_REGION` | `europe-west2` (or your preferred region) |
-| Substitution `PROJECT_NUMBER` | Your project's numeric ID (found on the GCP project dashboard) |
+| Event | Manual invocation |
+| Repository | the linked repo (2nd gen) |
+| Branch | `main` |
+| Configuration | Cloud Build configuration file → `cloudbuild.yaml` |
+| Substitutions | none required — `PROJECT_ID`, `PROJECT_NUMBER`, and `_REGION` are injected automatically |
 
-In **IAM**, grant the Cloud Build service account (`YOUR_PROJECT_NUMBER@cloudbuild.gserviceaccount.com`) the roles: `Editor`, `Composer Administrator`, `Secret Manager Secret Accessor`.
+---
 
-### 5 — Run the pipeline
+### 4 — Add the Met Office API key
 
-Push to `main` or manually run the trigger in the console. Cloud Build will:
+In **Secret Manager**, you'll find the secret `airflow-variables-MET_OFFICE_API_KEY` has already been created by Terraform. Click it → **New Version** and paste your API key.
 
-1. Run `terraform apply` — provisions GCS, BigQuery, and Cloud Composer (~15–20 min on first run)
-2. Deploy all DAGs, scripts, and seed files to the Composer GCS bucket
-3. Import Airflow variables into the Composer environment
+Airflow's Secret Manager backend resolves `Variable.get("MET_OFFICE_API_KEY")` to this secret automatically via the `airflow-variables-` prefix convention.
 
-Once complete, the Airflow UI URL appears under **Cloud Composer → Environments → Airflow webserver**. Open it and trigger the `met_office_full_pipeline` DAG.
+> If the secret doesn't exist yet, run the Cloud Build trigger first and come back — Terraform creates the shell, you add the value.
+
+---
+
+### 5 — Run the trigger and open Airflow
+
+Click **Run** on the trigger. After ~30 minutes the build will complete. The `met_office_full_pipeline` DAG may trigger automatically on its first scheduled run — if not, open **Cloud Composer → Environments → Open Airflow UI** and trigger it manually.
+
+The gold layer writes to both Delta Lake on GCS and native BigQuery tables in the `met_office_medallion_warehouse` dataset.
 
 ---
 
