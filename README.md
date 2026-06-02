@@ -2,11 +2,11 @@
 
 ## About Gabriel
 
-I'm a Data Architect, currently at **Camden Council** and previously contracted at **Coca-Cola** where I spent over two years in the same discipline.
+I'm a Data Architect, currently at **Camden Council** and previously contracted at **Coca-Cola** for over two years in the same discipline.
 
-In my day-to-day work I bridge the gap between the business and engineering: I conduct stakeholder interviews with non-technical users to understand data needs, translate those needs into formal data models, and work alongside data engineers to deliver pipelines that meet them. I have experience designing end-to-end data pipeline architectures and am comfortable communicating at both the business and technical level.
+My work bridges business and engineering: I run stakeholder interviews with non-technical users, translate their needs into formal data models, and design end-to-end pipeline architectures — comfortable communicating at both the business and technical level.
 
-This project is my implementation of those architectural skills in code: a production-style data pipeline running on GCP, built to demonstrate not just that I can design a system, but that I can build one.
+This project puts that architecture into code end-to-end: a cloud-native data pipeline on GCP, designed and built from the ground up — from API ingestion through a medallion lake to a star-schema warehouse.
 
 ---
 
