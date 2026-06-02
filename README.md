@@ -2,7 +2,7 @@
 
 ## About Gabriel
 
-I'm a Data Architect with over four years of professional experience, currently at **Camden Council** and previously at **Coca-Cola** where I spent over two years in the same discipline.
+I'm a Data Architect, currently at **Camden Council** and previously contracted at **Coca-Cola** where I spent over two years in the same discipline.
 
 In my day-to-day work I bridge the gap between the business and engineering: I conduct stakeholder interviews with non-technical users to understand data needs, translate those needs into formal data models, and work alongside data engineers to deliver pipelines that meet them. I have experience designing end-to-end data pipeline architectures and am comfortable communicating at both the business and technical level.
 
