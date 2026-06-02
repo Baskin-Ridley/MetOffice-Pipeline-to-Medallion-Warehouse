@@ -31,6 +31,7 @@ resource "google_project_service" "apis" {
     "storage.googleapis.com",
     "bigquery.googleapis.com",
     "composer.googleapis.com",
+    "dataproc.googleapis.com",
     "secretmanager.googleapis.com",
     "bigqueryconnection.googleapis.com",
   ]) : toset([])
