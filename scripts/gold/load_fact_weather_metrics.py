@@ -50,8 +50,8 @@ def main():
     DATASET_ID = sys.argv[3]
     DATALAKE_ROOT = f"gs://{BUCKET_NAME}"
     STATION_OBSERVATIONS_LAND_SILVER_DIR = f"{DATALAKE_ROOT}/silver/met_office/station_observation_land"
-    GOLD_DIR = f"{DATALAKE_ROOT}/gold/weather/weather_metrics"
-    BQ_TABLE = f"{PROJECT_ID}:{DATASET_ID}.FactWeatherMetrics"
+    GOLD_DIR = f"{DATALAKE_ROOT}/gold/weather/fact_weather_metrics"
+    BQ_TABLE = f"{PROJECT_ID}:{DATASET_ID}.fact_weather_metrics"
 
     spark = start_spark_session("MetOffice Weather Metrics silver to gold")
 
