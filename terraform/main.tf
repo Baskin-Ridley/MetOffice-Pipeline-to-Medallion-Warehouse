@@ -23,6 +23,24 @@ locals {
 }
 
 #=========================================
+# 0. APIS
+#=========================================
+resource "google_project_service" "apis" {
+  for_each = var.environment == "gcp" ? toset([
+    "cloudbuild.googleapis.com",
+    "storage.googleapis.com",
+    "bigquery.googleapis.com",
+    "composer.googleapis.com",
+    "secretmanager.googleapis.com",
+    "bigqueryconnection.googleapis.com",
+  ]) : toset([])
+
+  project            = var.project_id
+  service            = each.value
+  disable_on_destroy = false
+}
+
+#=========================================
 # 1. STORAGE (DATA LAKE)
 #=========================================
 resource "google_storage_bucket" "datalake" {
@@ -36,6 +54,8 @@ resource "google_storage_bucket" "datalake" {
   versioning {
     enabled = true
   }
+
+  depends_on = [google_project_service.apis]
 }
 
 resource "google_storage_bucket_object" "lake_folders" {
@@ -54,7 +74,9 @@ resource "google_bigquery_dataset" "warehouse" {
   friendly_name              = "Met Office Medallion Data Warehouse"
   description                = "Houses the Bronze, Silver, and Gold analytical data layers"
   location                   = "EU" 
-  delete_contents_on_destroy = true 
+  delete_contents_on_destroy = true
+
+  depends_on = [google_project_service.apis]
 }
 
 #=========================================
@@ -90,11 +112,25 @@ resource "google_composer_environment" "composer" {
       }
     }
   }
+
+  depends_on = [google_project_service.apis]
 }
 
 #=========================================
-# 4. IAM PERMISSIONS FOR SECRET MANAGER
+# 4. SECRET MANAGER
 #=========================================
+resource "google_secret_manager_secret" "met_office_api_key" {
+  count     = var.environment == "gcp" ? 1 : 0
+  project   = var.project_id
+  secret_id = "airflow-variables-MET_OFFICE_API_KEY"
+
+  replication {
+    auto {}
+  }
+
+  depends_on = [google_project_service.apis]
+}
+
 resource "google_secret_manager_secret_iam_member" "composer_secret_accessor" {
   count     = var.environment == "gcp" ? 1 : 0
   project   = var.project_id
@@ -111,6 +147,8 @@ resource "google_bigquery_connection" "biglake" {
   connection_id = "${var.project_id}-biglake"
   location      = "EU"
   cloud_resource {}
+
+  depends_on = [google_project_service.apis]
 }
 
 resource "google_storage_bucket_iam_member" "biglake_storage_viewer" {
@@ -160,6 +198,24 @@ resource "google_bigquery_table" "fact_weather_metrics" {
     connection_id = google_bigquery_connection.biglake[0].name
     autodetect    = true
   }
+}
+
+#=========================================
+# 6. CLOUD BUILD PERMISSIONS
+#=========================================
+resource "google_project_iam_member" "cloudbuild_roles" {
+  for_each = var.environment == "gcp" ? toset([
+    "roles/editor",
+    "roles/composer.admin",
+    "roles/secretmanager.admin",
+    "roles/bigquery.admin",
+  ]) : toset([])
+
+  project = var.project_id
+  role    = each.value
+  member  = "serviceAccount:${var.project_number}@cloudbuild.gserviceaccount.com"
+
+  depends_on = [google_project_service.apis]
 }
 
 #=========================================
