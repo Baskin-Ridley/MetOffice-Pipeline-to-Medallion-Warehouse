@@ -8,6 +8,7 @@ from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 GCS_BUCKET = os.environ.get("GCS_BUCKET")
 GCS_DAGS_PATH = f"gs://{GCS_BUCKET}/dags"
 DATALAKE_BUCKET = Variable.get("datalake_bucket")
+PROJECT_ID = Variable.get("project_id")
 SPARK_JARS_PACKAGES = Variable.get("spark_jars_packages", "io.delta:delta-spark_2.13:3.1.0")
 GCP_REGION = os.environ.get("GCP_REGION", "europe-west2")
 
@@ -20,7 +21,7 @@ DEFAULT_ARGS = {
     "email_on_retry": False,
     "retries": 1,
     "retry_delay": timedelta(minutes=10),
-    "project_id": "met-office-medallion-warehouse",
+    "project_id": PROJECT_ID,
     "region": GCP_REGION,
 }
 
