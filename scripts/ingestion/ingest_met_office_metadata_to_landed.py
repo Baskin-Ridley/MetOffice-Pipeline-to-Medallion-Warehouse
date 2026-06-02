@@ -31,7 +31,7 @@ def fetch_met_office_metadata(lat: float, lon: float) -> Optional[Dict]:
     }
 
     try:
-        response = requests.get(BASE_URL, headers=HEADERS, params=params)
+        response = requests.get(BASE_URL, headers=HEADERS, params=params, timeout=30)
         response.raise_for_status()
         data = response.json()
 

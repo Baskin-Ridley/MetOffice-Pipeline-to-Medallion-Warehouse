@@ -26,7 +26,7 @@ def fetch_met_office_data(geohash: str) -> dict:
 
     url = f"{BASE_URL}{geohash}"
     try:
-        response = requests.get(url, headers=HEADERS)
+        response = requests.get(url, headers=HEADERS, timeout=30)
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
