@@ -42,29 +42,42 @@ def transform_to_gold(df):
 
 
 def main():
-    if len(sys.argv) < 2:
-        raise ValueError("Missing required datalake bucket argument.")
+    if len(sys.argv) < 4:
+        raise ValueError("Usage: load_fact_weather_metrics.py <bucket> <project_id> <dataset_id>")
 
     BUCKET_NAME = sys.argv[1]
+    PROJECT_ID = sys.argv[2]
+    DATASET_ID = sys.argv[3]
     DATALAKE_ROOT = f"gs://{BUCKET_NAME}"
     STATION_OBSERVATIONS_LAND_SILVER_DIR = f"{DATALAKE_ROOT}/silver/met_office/station_observation_land"
     GOLD_DIR = f"{DATALAKE_ROOT}/gold/weather/weather_metrics"
+    BQ_TABLE = f"{PROJECT_ID}:{DATASET_ID}.FactWeatherMetrics"
 
     spark = start_spark_session("MetOffice Weather Metrics silver to gold")
 
     df = spark.readStream.format("delta").load(STATION_OBSERVATIONS_LAND_SILVER_DIR)
     df_gold = transform_to_gold(df)
 
-    query = df_gold.writeStream.format("delta") \
-        .outputMode("append") \
+    def write_batch(batch_df, _epoch_id):
+        batch_df.write.format("delta") \
+            .mode("append") \
+            .option("mergeSchema", "true") \
+            .save(GOLD_DIR)
+        batch_df.write \
+            .format("bigquery") \
+            .option("table", BQ_TABLE) \
+            .option("temporaryGcsBucket", BUCKET_NAME) \
+            .mode("append") \
+            .save()
+
+    query = df_gold.writeStream \
+        .foreachBatch(write_batch) \
         .option("checkpointLocation", f"{GOLD_DIR}/_checkpoints") \
-        .option("path", GOLD_DIR) \
-        .option("mergeSchema", "true") \
         .trigger(availableNow=True) \
-        .toTable("FactWeatherMetrics")
+        .start()
 
     query.awaitTermination()
-    logger.info("New data successfully written to Gold layer.")
+    logger.info("New data successfully written to Delta and BigQuery.")
     spark.stop()
 
 

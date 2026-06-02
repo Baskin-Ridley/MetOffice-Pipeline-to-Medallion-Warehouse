@@ -7,13 +7,16 @@ logger = logging.getLogger(__name__)
 
 
 def main():
-    if len(sys.argv) < 2:
-        raise ValueError("Missing required datalake bucket argument.")
+    if len(sys.argv) < 4:
+        raise ValueError("Usage: load_dim_weather_stations.py <bucket> <project_id> <dataset_id>")
 
     BUCKET_NAME = sys.argv[1]
+    PROJECT_ID = sys.argv[2]
+    DATASET_ID = sys.argv[3]
     DATALAKE_ROOT = f"gs://{BUCKET_NAME}"
     STATION_METADATA_SILVER_DIR = f"{DATALAKE_ROOT}/silver/met_office/station_metadata"
     GOLD_DIR = f"{DATALAKE_ROOT}/gold/weather/dim_weather_stations"
+    BQ_TABLE = f"{PROJECT_ID}:{DATASET_ID}.DimWeatherStations"
 
     spark = start_spark_session("MetOffice Weather Stations Gold Dimension")
 
@@ -68,7 +71,18 @@ def main():
         logger.info("Table not found, performing initial load: %s", e)
         df_gold.write.format("delta").mode("overwrite").save(GOLD_DIR)
 
-    logger.info("DimWeatherStations written to %s.", GOLD_DIR)
+    logger.info("DimWeatherStations written to Delta: %s", GOLD_DIR)
+
+    df_full = spark.read.format("delta").load(GOLD_DIR)
+    logger.info("Writing DimWeatherStations to BigQuery: %s", BQ_TABLE)
+    df_full.write \
+        .format("bigquery") \
+        .option("table", BQ_TABLE) \
+        .option("temporaryGcsBucket", BUCKET_NAME) \
+        .mode("overwrite") \
+        .save()
+
+    logger.info("DimWeatherStations successfully written to Delta and BigQuery.")
     spark.stop()
 
 

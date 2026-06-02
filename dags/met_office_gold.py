@@ -51,6 +51,8 @@ with DAG(
     params={
         "gcs_dags_path": DAGS_GCS_PATH,
         "datalake_bucket": DATALAKE_BUCKET,
+        "project_id": PROJECT_ID,
+        "dataset_id": "met_office_medallion_warehouse",
         "spark_jars_packages": SPARK_JARS_PACKAGES,
     },
 ) as dag:
@@ -67,7 +69,7 @@ with DAG(
             "pyspark_batch": {
                 "main_python_file_uri": "{{ params.gcs_dags_path }}/scripts/gold/load_dim_date.py",
                 "python_file_uris": ["{{ params.gcs_dags_path }}/common/file_utils.py"],
-                "args": ["{{ params.datalake_bucket }}"],
+                "args": ["{{ params.datalake_bucket }}", "{{ params.project_id }}", "{{ params.dataset_id }}"],
             },
             "runtime_config": {
                 "properties": {
@@ -84,7 +86,7 @@ with DAG(
             "pyspark_batch": {
                 "main_python_file_uri": "{{ params.gcs_dags_path }}/scripts/gold/load_dim_weather_stations.py",
                 "python_file_uris": ["{{ params.gcs_dags_path }}/common/file_utils.py"],
-                "args": ["{{ params.datalake_bucket }}"],
+                "args": ["{{ params.datalake_bucket }}", "{{ params.project_id }}", "{{ params.dataset_id }}"],
             },
             "runtime_config": {
                 "properties": {
@@ -101,7 +103,7 @@ with DAG(
             "pyspark_batch": {
                 "main_python_file_uri": "{{ params.gcs_dags_path }}/scripts/gold/load_fact_weather_metrics.py",
                 "python_file_uris": ["{{ params.gcs_dags_path }}/common/file_utils.py"],
-                "args": ["{{ params.datalake_bucket }}"],
+                "args": ["{{ params.datalake_bucket }}", "{{ params.project_id }}", "{{ params.dataset_id }}"],
             },
             "runtime_config": {
                 "properties": {

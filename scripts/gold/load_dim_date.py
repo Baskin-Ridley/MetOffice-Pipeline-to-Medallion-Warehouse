@@ -36,28 +36,37 @@ def generate_dim_date(spark, start_date: str, end_date: str):
 
 
 def main():
-    if len(sys.argv) < 2:
-        raise ValueError("Missing required datalake bucket argument.")
+    if len(sys.argv) < 4:
+        raise ValueError("Usage: load_dim_date.py <bucket> <project_id> <dataset_id> [start_date] [end_date]")
 
     BUCKET_NAME = sys.argv[1]
-    start_date = sys.argv[2] if len(sys.argv) > 2 else "2020-01-01"
-    end_date = sys.argv[3] if len(sys.argv) > 3 else "2031-12-31"
+    PROJECT_ID = sys.argv[2]
+    DATASET_ID = sys.argv[3]
+    start_date = sys.argv[4] if len(sys.argv) > 4 else "2020-01-01"
+    end_date = sys.argv[5] if len(sys.argv) > 5 else "2031-12-31"
     GOLD_DIM_DIR = f"gs://{BUCKET_NAME}/gold/master/dim_date"
+    BQ_TABLE = f"{PROJECT_ID}:{DATASET_ID}.DimDate"
 
     spark = start_spark_session("Generate Gold DimDate")
 
     logger.info("Generating Date Dimension from %s to %s...", start_date, end_date)
     df_dim_date = generate_dim_date(spark, start_date, end_date)
 
-    logger.info("Writing DimDate to: %s", GOLD_DIM_DIR)
+    logger.info("Writing DimDate to Delta: %s", GOLD_DIM_DIR)
     df_dim_date.write.format("delta") \
         .mode("overwrite") \
         .option("mergeSchema", "true") \
         .save(GOLD_DIM_DIR)
 
-    spark.sql(f"CREATE TABLE IF NOT EXISTS DimDate USING DELTA LOCATION '{GOLD_DIM_DIR}'")
+    logger.info("Writing DimDate to BigQuery: %s", BQ_TABLE)
+    df_dim_date.write \
+        .format("bigquery") \
+        .option("table", BQ_TABLE) \
+        .option("temporaryGcsBucket", BUCKET_NAME) \
+        .mode("overwrite") \
+        .save()
 
-    logger.info("DimDate successfully written to %s.", GOLD_DIM_DIR)
+    logger.info("DimDate successfully written to Delta and BigQuery.")
     spark.stop()
 
 
