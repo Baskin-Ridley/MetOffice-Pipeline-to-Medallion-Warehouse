@@ -1,4 +1,14 @@
 steps:
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    id: 'create-state-bucket'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud storage buckets describe gs://met-office-medallion-warehouse-datalake --project=${PROJECT_ID} 2>/dev/null \
+          || gcloud storage buckets create gs://met-office-medallion-warehouse-datalake \
+               --location=${_REGION} --project=${PROJECT_ID}
+
   - name: 'hashicorp/terraform:1.5.7'
     id: 'terraform-init'
     dir: 'terraform'
