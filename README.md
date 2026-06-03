@@ -165,7 +165,7 @@ erDiagram
 ├── common/                 # Shared utilities (Spark session factory, GCS helpers)
 ├── seeds/                  # Station seed CSV (390 UK stations)
 ├── terraform/              # GCS bucket, BigQuery dataset, Composer environment
-├── tests/                  # DAG integrity + transform unit tests, plus local docker-compose harness
+├── tests/                  # DAG integrity + transform unit tests
 └── cloudbuild.yaml         # CI/CD: terraform apply → deploy DAGs to Composer
 ```
 
