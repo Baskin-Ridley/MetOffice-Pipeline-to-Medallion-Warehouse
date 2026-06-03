@@ -165,7 +165,7 @@ erDiagram
 ├── common/                 # Shared utilities (Spark session factory, GCS helpers)
 ├── seeds/                  # Station seed CSV (390 UK stations)
 ├── terraform/              # GCS bucket, BigQuery dataset, Composer environment
-├── tests/                  # DAG integrity + transform unit tests
+├── tests/                  # DAG integrity + transform unit tests, plus local docker-compose harness
 └── cloudbuild.yaml         # CI/CD: terraform apply → deploy DAGs to Composer
 ```
 
@@ -254,7 +254,7 @@ The gold layer writes to both Delta Lake on GCS and native BigQuery tables in th
 ## Tests
 
 ```bash
-docker compose run --rm test
+docker compose -f tests/docker-compose.yaml run --rm test
 ```
 
 Covers DAG structural integrity (task count, dependency ordering), branch routing logic, and PySpark transform correctness for the silver and gold layers.

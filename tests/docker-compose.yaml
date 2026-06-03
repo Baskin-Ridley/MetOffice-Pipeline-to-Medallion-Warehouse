@@ -16,10 +16,10 @@ services:
       - POSTGRES_DB=airflow
 
   airflow-common: &airflow-common
-    build: .
-    user: root 
+    build: ..
+    user: root
     env_file:
-      - .env
+      - ../.env
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
@@ -34,12 +34,12 @@ services:
       - AIRFLOW_VAR_DATA_LAKE_ROOT_PATH=${AIRFLOW_VAR_DATA_LAKE_ROOT_PATH}
     volumes:
       # local
-      - ./dags:/opt/airflow/dags
-      - ./scripts:/opt/airflow/scripts
-      - ./common:/opt/airflow/common
-      - ./logs:/opt/airflow/logs
-      - ./keys:/opt/airflow/keys
-      - ./seeds:/opt/airflow/seeds
+      - ../dags:/opt/airflow/dags
+      - ../scripts:/opt/airflow/scripts
+      - ../common:/opt/airflow/common
+      - ../logs:/opt/airflow/logs
+      - ../keys:/opt/airflow/keys
+      - ../seeds:/opt/airflow/seeds
       # SHARED NAMED VOLUMES: 
       - landed-vol:/opt/airflow/landed
       - bronze-vol:/opt/airflow/bronze
@@ -58,8 +58,8 @@ services:
   airflow-webserver:
     <<: *airflow-common
     command: webserver
-    env_file: 
-      - .env
+    env_file:
+      - ../.env
     ports:
       - "8080:8080"
     restart: always
@@ -92,7 +92,7 @@ services:
     image: deltaio/delta-docker:4.0.1
     user: root
     env_file:
-      - .env
+      - ../.env
     environment:
       - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
       - GCP_PROJECT_ID=${GCP_PROJECT_ID}
@@ -119,22 +119,22 @@ services:
       - bronze-vol:/opt/airflow/bronze
       - silver-vol:/opt/airflow/silver
       - gold-vol:/opt/airflow/gold
-      - ./keys:/opt/airflow/keys
+      - ../keys:/opt/airflow/keys
   test:
     build:
-      context: .
-      dockerfile: Dockerfile.test
+      context: ..
+      dockerfile: tests/Dockerfile.test
     user: root
     environment:
       - PYTHONPATH=/opt/airflow
       - GCS_BUCKET=test-bucket
       - GCP_REGION=europe-west2
     volumes:
-      - ./dags:/opt/airflow/dags
-      - ./scripts:/opt/airflow/scripts
-      - ./common:/opt/airflow/common
-      - ./tests:/opt/airflow/tests
-      - ./seeds:/opt/airflow/seeds
+      - ../dags:/opt/airflow/dags
+      - ../scripts:/opt/airflow/scripts
+      - ../common:/opt/airflow/common
+      - .:/opt/airflow/tests
+      - ../seeds:/opt/airflow/seeds
     command: python -m pytest tests/ -v
 
 volumes:
