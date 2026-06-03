@@ -144,7 +144,7 @@ erDiagram
 | CI/CD | Google Cloud Build |
 | Ingestion | Python + Polars |
 | Secrets | GCP Secret Manager (Airflow secrets backend) |
-| Testing | pytest + PySpark |
+| Testing | pytest |
 
 ---
 
