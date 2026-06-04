@@ -23,7 +23,6 @@ services:
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres/airflow
-      - AIRFLOW__CORE__FERNET_KEY=fb39118918e32145a1d07a71c8ffb00c=
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
       - AIRFLOW__DATABASE__LOAD_DEFAULT_CONNECTIONS=False
       - GCP_PROJECT_ID=${GCP_PROJECT_ID}
