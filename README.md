@@ -51,6 +51,10 @@ The pipeline is orchestrated by **Apache Airflow** (Cloud Composer), with heavy 
 
 ## Pipeline DAG Flow
 
+![Master DAG run with all layers successful](docs/images/airflow_dag_success_1.png)
+*Master DAG `met_office_full_pipeline` — all four layers triggered and completed successfully.*
+
+
 The master DAG (`met_office_full_pipeline`) chains four sub-DAGs with a `TriggerDagRunOperator` pattern. Each sub-DAG accepts a `run_mode` parameter and uses a `BranchPythonOperator` to execute only the relevant branch, allowing individual layers to be re-run in isolation.
 
 ```
