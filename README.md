@@ -2,11 +2,8 @@
 
 ## About Gabriel
 
-I'm a Data Architect, currently at **Camden Council** and previously contracted at **Coca-Cola** for over three years in the same discipline.
-
-My work bridges business and engineering: I run stakeholder interviews with non-technical users, translate their needs into formal data models, and design end-to-end pipeline architectures, comfortable communicating at both the business and technical level.
-
-This project puts that architecture into code end-to-end: a cloud-native data pipeline on GCP, designed and built from the ground up, from API ingestion through a medallion lake to a star-schema warehouse.
+I designed and built this project end to end: API ingestion, medallion lake, star-schema warehouse, orchestration, infrastructure and CI/CD, all from scratch on GCP.
+My background is in data architecture, at Coca-Cola Europacific Partners and currently Camden Council, where I've spent three years modelling warehouses, designing dimensional schemas and prototyping PySpark pipelines alongside engineering teams. That background shaped the decisions here: SCD Type 2 on the station dimension, an unpivoted fact table, and a layered DAG design weren't afterthoughts but the starting point.
 
 ---
 
