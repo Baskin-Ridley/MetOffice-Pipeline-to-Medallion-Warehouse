@@ -4,10 +4,12 @@ import requests
 import time
 from typing import Dict, Optional
 import json
+import re
 from datetime import datetime
 from upath import UPath
 from dotenv import load_dotenv
 from airflow.models import Variable
+
 
 load_dotenv()
 
