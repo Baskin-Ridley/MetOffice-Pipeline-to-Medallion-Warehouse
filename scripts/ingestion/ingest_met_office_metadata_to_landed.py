@@ -61,7 +61,7 @@ def save_metadata_to_landed(station_name: str, latitude: float, longitude: float
         **metadata
     }
 
-    file_path = LANDED_DIR / run_timestamp / f"{station_name}.json"
+    file_path = LANDED_DIR / run_timestamp / f"{re.sub(r'[^A-Za-z0-9._-]', '_', station_name)}.json"
     file_path.parent.mkdir(parents=True, exist_ok=True)
 
     with file_path.open("w") as f:

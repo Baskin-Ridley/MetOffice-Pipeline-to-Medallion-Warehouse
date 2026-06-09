@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 import polars as pl
 from upath import UPath
 from airflow.models import Variable
-
+import re
 load_dotenv()
 
 logger = logging.getLogger(__name__)
