@@ -38,7 +38,7 @@ The pipeline is orchestrated by **Apache Airflow** (Cloud Composer), with heavy 
 │                    ├─────────────────────┤   ├──────────────────────────┤ │
 │                    │ DimDate             │   │ DimDate                  │ │
 │                    │ DimWeatherStations  │   │ DimWeatherStations       │ │
-│                    │ FactWeatherMetrics  │   │ fact_weather_metrics     │ │
+│                    │ FactWeatherMetrics  │   │ FactWeatherMetrics     │ │
 │                    └─────────────────────┘   └──────────────────────────┘ │
 │                                                                            │
 │   Orchestration  Cloud Composer (Airflow)                                  │
@@ -259,3 +259,21 @@ docker compose -f tests/docker-compose.yaml run --rm test
 ```
 
 Covers DAG structural integrity (task count, dependency ordering), branch routing logic, and PySpark transform correctness for the silver and gold layers.
+
+---
+
+## Querying the Warehouse
+
+The gold star schema lands in the `met_office_medallion_warehouse` BigQuery dataset, ready for analytical queries. A few examples run against the live tables:
+
+**Metric breakdown and row counts.** Grouping the fact by `MetricName` shows the EAV design working as intended: quantitative metrics populate `ValueNumeric`, while categorical ones (Wind Direction) populate `ValueString` instead.
+
+![Row counts per metric, split by numeric and string values](docs/bigquery/metrics_row_count_100626.png)
+
+**Pivoting the EAV fact back to a wide view.** Conditional aggregation collapses the one-row-per-metric structure back into a familiar one-row-per-observation shape when a report needs it.
+
+![Metrics pivoted into columns, one row per station observation](docs/bigquery/average_metrics.png)
+
+**Windiest stations by season.** A three-way join across `FactWeatherMetrics`, `DimWeatherStations` (current records only) and `DimDate` ranks stations by average wind speed and peak gust per season.
+
+![Average wind speed and peak gust per station and season](docs/bigquery/wind_speed_station.png)
