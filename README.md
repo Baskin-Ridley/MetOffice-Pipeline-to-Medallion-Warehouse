@@ -38,7 +38,7 @@ The pipeline is orchestrated by **Apache Airflow** (Cloud Composer), with heavy 
 │                    ├─────────────────────┤   ├──────────────────────────┤ │
 │                    │ DimDate             │   │ DimDate                  │ │
 │                    │ DimWeatherStations  │   │ DimWeatherStations       │ │
-│                    │ FactWeatherMetrics  │   │ FactWeatherMetrics     │ │
+│                    │ FactWeatherMetrics  │   │ FactWeatherMetrics       │ │
 │                    └─────────────────────┘   └──────────────────────────┘ │
 │                                                                            │
 │   Orchestration  Cloud Composer (Airflow)                                  │
