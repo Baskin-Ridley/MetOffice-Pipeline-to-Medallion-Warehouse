@@ -51,7 +51,7 @@ The pipeline is orchestrated by **Apache Airflow** (Cloud Composer), with heavy 
 
 ## Pipeline DAG Flow
 
-![Master DAG run with all layers successful](docs/images/airflow_dag_success_1.png)
+![Master DAG run with all layers successful](docs/images/airflow_dag_success_2.png)
 *Master DAG `met_office_full_pipeline` — all four layers triggered and completed successfully.*
 
 
